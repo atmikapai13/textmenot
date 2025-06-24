@@ -1,0 +1,132 @@
+.landing-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  font-family: 'Comic Sans MS', 'Comic Sans', 'Chalkboard SE', 'Comic Neue', cursive, sans-serif;
+}
+
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 2rem 2rem 1rem 2rem;
+  border-bottom: 2px solid #f3e6f9;
+}
+
+.landing-title {
+  color: #FF4FCB;
+  font-size: 2.8rem;
+  font-weight: bold;
+  margin: 0 0 0.5rem 0;
+  font-family: inherit;
+  letter-spacing: 1px;
+}
+
+.landing-tagline {
+  color: #FF4FCB;
+  font-size: 1.2rem;
+  font-style: italic;
+  margin-bottom: 0.5rem;
+}
+
+.landing-flower {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-left: 2rem;
+}
+
+.landing-flower-text {
+  color: #FF4FCB;
+  font-size: 0.9rem;
+  text-align: center;
+  margin-top: 0.2rem;
+  font-family: inherit;
+}
+
+.landing-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem 1rem 1rem;
+}
+
+.landing-dropzone {
+  width: 100%;
+  max-width: 500px;
+  min-height: 140px;
+  border: 2.5px dashed #FF4FCB;
+  border-radius: 18px;
+  background: #fff8fd;
+  color: #888;
+  font-size: 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 2rem;
+  cursor: pointer;
+  transition: border 0.2s, background 0.2s;
+  text-align: center;
+  font-family: inherit;
+}
+.landing-dropzone.active {
+  border: 2.5px solid #FF4FCB;
+  background: #ffe3f7;
+}
+
+.landing-submit {
+  width: 100%;
+  max-width: 500px;
+  background: #FF4FCB;
+  color: #fff;
+  font-size: 1.5rem;
+  font-family: inherit;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  padding: 0.8rem 0;
+  margin-top: 0.5rem;
+  box-shadow: 0 2px 8px #ffd6f5a0;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+}
+.landing-submit:hover {
+  background: #e03bb0;
+  box-shadow: 0 4px 16px #ffd6f5c0;
+}
+
+.landing-footer {
+  text-align: center;
+  color: #bdbdbd;
+  font-size: 1.1rem;
+  padding: 1.2rem 0 0.7rem 0;
+  border-top: 2px solid #f3e6f9;
+  margin-top: auto;
+  letter-spacing: 1px;
+  background: #fff;
+}
+
+@media (max-width: 600px) {
+  .landing-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 1.2rem 1rem 0.7rem 1rem;
+  }
+  .landing-flower {
+    margin-left: 0;
+    margin-top: 1rem;
+  }
+  .landing-title {
+    font-size: 2rem;
+  }
+  .landing-main {
+    padding: 1rem 0.2rem 0.5rem 0.2rem;
+  }
+  .landing-dropzone, .landing-submit {
+    max-width: 98vw;
+    font-size: 1.1rem;
+  }
+} 
