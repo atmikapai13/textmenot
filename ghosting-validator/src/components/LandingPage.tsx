@@ -1,89 +1,49 @@
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import './LandingPage.css';
 
 interface LandingPageProps {
-  onFileSelected: (file: File) => void;
-  tagline?: string;
+  onNext?: () => void;
 }
 
-const flowerSVG = (
-  <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="30" cy="30" r="12" fill="#FF4FCB"/>
-    <ellipse cx="30" cy="12" rx="8" ry="4" fill="#FFB6EC"/>
-    <ellipse cx="30" cy="48" rx="8" ry="4" fill="#FFB6EC"/>
-    <ellipse cx="12" cy="30" rx="4" ry="8" fill="#FFB6EC"/>
-    <ellipse cx="48" cy="30" rx="4" ry="8" fill="#FFB6EC"/>
-    <ellipse cx="18" cy="18" rx="4" ry="8" transform="rotate(-45 18 18)" fill="#FFB6EC"/>
-    <ellipse cx="42" cy="18" rx="4" ry="8" transform="rotate(45 42 18)" fill="#FFB6EC"/>
-    <ellipse cx="18" cy="42" rx="4" ry="8" transform="rotate(45 18 42)" fill="#FFB6EC"/>
-    <ellipse cx="42" cy="42" rx="4" ry="8" transform="rotate(-45 42 42)" fill="#FFB6EC"/>
-  </svg>
-);
+export const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
+  const [showNext, setShowNext] = useState(false);
 
-export const LandingPage: React.FC<LandingPageProps> = ({ onFileSelected, tagline }) => {
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [dragActive, setDragActive] = useState(false);
-
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      onFileSelected(e.dataTransfer.files[0]);
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    setDragActive(false);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      onFileSelected(e.target.files[0]);
-    }
-  };
+  useEffect(() => {
+    const timer = setTimeout(() => setShowNext(true), 3000);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <div className="landing-root">
-      <header className="landing-header">
-        <div>
-          <h1 className="landing-title">Is He Into You?</h1>
-          <div className="landing-tagline">{tagline || 'Decode your chat. Discover your fate. Have a laugh.'}</div>
+      <div className="landing-content">
+        <h1 className="landing-heading">He'll Text Me.</h1>
+        <img src="public/rose.gif" alt="rose" className="landing-rose" />
+        <h2 className="landing-heading">He'll Text Me Not...</h2>
+        <div className="landing-body">
+          <p className="landing-intro">
+            <em>Texting is the bane of modern dating.<br/>
+            Where once there was longing, now there is latency.<br/>
+            Where once poetry bloomed, now only read receipts.</em>
+          </p>
+          <p className="landing-intro">
+            So, upload your chat history. Seek answers to your most pressing questions:<br/>
+            Who initiated the <span className="landing-em">most</span>?<br/>
+            Who responded the <span className="landing-em">quickest</span>?<br/>
+            Who ghosted <span className="landing-em">first</span> — but who ghosted <span className="landing-em">harder</span>?
+          </p>
+          <p className="landing-intro">
+            This is not therapy. This is not closure. <br/>
+            This is <span className="landing-em">˚.⋆ AI⁺₊✧☾</span>.
+          </p>
         </div>
-        <div className="landing-flower">
-          {flowerSVG}
-          <div className="landing-flower-text">He texts me.<br/>He texts me not.</div>
-        </div>
-      </header>
-      <main className="landing-main">
-        <div
-          className={`landing-dropzone${dragActive ? ' active' : ''}`}
-          onDrop={handleDrop}
-          onDragOver={handleDragOver}
-          onDragLeave={handleDragLeave}
-          onClick={() => fileInputRef.current?.click()}
+        <button
+          className={`landing-next${showNext ? ' fade-in visible' : ' invisible'}`}
+          onClick={showNext && onNext ? onNext : undefined}
         >
-          <span>Drag & drop text transcript ↓</span>
-          <input
-            type="file"
-            accept=".txt,.csv"
-            ref={fileInputRef}
-            style={{ display: 'none' }}
-            onChange={handleFileChange}
-          />
-        </div>
-        <button className="landing-submit" onClick={() => fileInputRef.current?.click()}>
-          Submit
+          Next
         </button>
-      </main>
-      <footer className="landing-footer">
-        Powered by Eros
-      </footer>
+      </div>
     </div>
   );
 }; 
+

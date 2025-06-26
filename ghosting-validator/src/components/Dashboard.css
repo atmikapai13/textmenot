@@ -1,0 +1,216 @@
+.dashboard-root {
+  position: relative;
+  min-height: 95vh;
+  min-width: 95vw;
+  background: #FFF5F7;
+  padding: 2.5rem 1.5rem 2.5rem 1.5rem;
+  box-sizing: border-box;
+  font-family: 'Lora', serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-corner {
+  position: absolute;
+  width: 140px;
+  height: 140px;
+  opacity: 0.5;
+  z-index: 2;
+}
+
+.dashboard-center-rect {
+  background: #FFE8FB;
+  border-radius: 2rem;
+  padding: 2.5rem 1.5rem 2.5rem 1.5rem;
+  width: 83vw;
+  height: 73vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+} 
+
+.topleft { top: 0; left: 0; }
+.topright { top: 0; right: 0; }
+.bottomleft { bottom: 0; left: 0; }
+.bottomright { bottom: 0; right: 0; }
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  z-index: 2;
+}
+.dashboard-title {
+  font-family: 'DM Serif Text', serif;
+  color: #E33CC1;
+  font-size: 2.2rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 0.2rem;
+  margin-top: 2.5rem;
+}
+
+.dashboard-dates {
+  color: #E33CC1;
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-bottom: 1.2rem;
+}
+
+.dashboard-facts {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: stretch;
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  
+  padding: 1.2rem 2.2rem;
+  margin-bottom: 2.2rem;
+  gap: 2.2rem;
+  z-index: 2;
+  position: relative;
+}
+
+.dashboard-facts-title {
+  font-family: 'DM Serif Text', serif;
+  color: #682960;
+  font-size: 1rem;
+  font-style: italic;
+  font-weight: bold;
+  
+  text-align: center;
+
+  pointer-events: none;
+}
+
+.dashboard-fact {
+  font-family: 'Lora', serif;
+  text-align: center;
+  font-size: 0.1rem;
+  color: #0E2102;
+  min-width: 110px;
+  margin-top: 2.2rem;
+}
+.fact-number {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  color: #E33CC1;
+  font-weight: 700;
+}
+
+.dashboard-main {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.2rem;
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 2.2rem;
+  z-index: 2;
+}
+.dashboard-kpi, .dashboard-graphs {
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  
+  padding: 1.2rem 1.5rem;
+  flex: 1;
+  min-width: 260px;
+}
+.kpi-title, .graphs-title {
+  font-family: 'DM Serif Text', serif;
+  color: #682960;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+
+.kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.0rem;
+  margin-top: 0.5rem;
+}
+.kpi-table th, .kpi-table td {
+  padding: 0.3rem 0.5rem;
+  text-align: right;
+  color: #682960;
+  font-weight: 700;
+}
+
+.kpi-table td {
+  padding: 0.3rem 0.5rem;
+  text-align: right;
+  color: #682960;
+  font-weight: 700;
+}
+
+.kpi-table th {
+  font-family: 'DM Serif Text', serif;
+  font-weight: bold;
+  font-size: 1.3rem;
+  color: #E33CC1;
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+}
+
+.kpi-table td {
+  font-family: 'Lora', serif;
+}
+
+.dashboard-graphs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+.graphs-title {
+  text-align: center;
+  width: 100%;
+}
+.graphs-bar, .graphs-pie {
+  width: 100%;
+  background: none;
+}
+.graph-label {
+  font-size: 1rem;
+  color: #682960;
+  font-style: italic;
+  margin-bottom: 0.2rem;
+  text-align: center;
+}
+
+.dashboard-summary {
+  margin-top: 1.2rem;
+  text-align: center;
+  color: #682960;
+  font-size: 1.1rem;
+  font-family: 'Lora', serif;
+  z-index: 2;
+  font-style: italic;
+}
+.dashboard-italic {
+  font-style: italic;
+  color: #E33CC1;
+}
+
+.dashboard-share {
+  margin-top: 0.5rem;
+  text-align: center;
+  color: #FF9AEF;
+  font-family: 'DM Serif Text', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  cursor: pointer;
+  z-index: 2;
+}
+

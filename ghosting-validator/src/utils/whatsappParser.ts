@@ -345,4 +345,20 @@ export function calculateGhostingRiskForBoth(messages: WhatsAppMessage[], stats:
   result[userA] = calcRisk(userA, userB);
   result[userB] = calcRisk(userB, userA);
   return result;
+}
+
+/**
+ * Count all emoji in the chat messages
+ */
+export function countAllEmoji(messages: WhatsAppMessage[]): number {
+  // Unicode emoji regex (covers most emoji)
+  const emojiRegex = /[\p{Emoji}]/gu;
+  let count = 0;
+  for (const msg of messages) {
+    if (msg.message) {
+      const matches = msg.message.match(emojiRegex);
+      if (matches) count += matches.length;
+    }
+  }
+  return count;
 } 
