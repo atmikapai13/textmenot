@@ -126,10 +126,10 @@ export const Dashboard: React.FC = () => {
   return (
     <div className="dashboard-root">
       {/* Corner decorations */}
-      <img src="public/rose2.png" alt="corner" className="dashboard-corner topleft" />
-      <img src="public/rose2.png" alt="corner" className="dashboard-corner topright flip-horizontal" />
-      <img src="public/rose2.png" alt="corner" className="dashboard-corner bottomleft" />
-      <img src="public/rose2.png" alt="corner" className="dashboard-corner bottomright flip-horizontal" />
+      <img src="rose2.png" alt="corner" className="dashboard-corner topleft" />
+      <img src="rose2.png" alt="corner" className="dashboard-corner topright flip-horizontal" />
+      <img src="rose2.png" alt="corner" className="dashboard-corner bottomleft" />
+      <img src="rose2.png" alt="corner" className="dashboard-corner bottomright flip-horizontal" />
       
       <div className="dashboard-center-rect">
         <div className="dashboard-header">
