@@ -33,7 +33,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
           </p>
           <p className="landing-intro">
             This is not therapy. This is not closure. <br/>
-            This is <span className="landing-em">˚.⋆ AI⁺₊✧☾</span>.
+            This is <span className="landing-em">˚.⋆ Data Science⁺₊✧☾</span>.
           </p>
         </div>
         <button

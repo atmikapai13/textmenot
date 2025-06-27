@@ -1,20 +1,20 @@
 import React, { useRef, useState } from 'react';
 import './TutorialPage.css';
+import { useNavigate } from 'react-router-dom';
 
 interface TutorialPageProps {
-  onNext?: () => void;
+  onNext: () => void;
 }
 
-export const TutorialPage: React.FC<TutorialPageProps> = ({ onNext }) => {
+export const TutorialPage: React.FC<TutorialPageProps> = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [showError, setShowError] = useState(false);
+  const navigate = useNavigate();
 
   const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setSelectedFile(e.dataTransfer.files[0]);
-      setShowError(false);
     }
   };
 
@@ -29,19 +29,13 @@ export const TutorialPage: React.FC<TutorialPageProps> = ({ onNext }) => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
-      setShowError(false);
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (
-      selectedFile &&
-      (selectedFile.name.endsWith('.txt') || selectedFile.name.endsWith('.zip'))
-    ) {
-      if (onNext) onNext();
-    } else {
-      setShowError(true);
+    if (selectedFile) {
+      navigate('/loading', { state: { file: selectedFile } });
     }
   };
 
@@ -51,8 +45,8 @@ export const TutorialPage: React.FC<TutorialPageProps> = ({ onNext }) => {
         <h1 className="tutorial-heading">Upload chats from WhatsApp</h1>
         <div className="tutorial-steps">
           <em>1. Open WhatsApp on your phone<br /></em>
-          <em>2. Go to your chat with him<br /></em>
-          <em>3. Tap on his name and open Contact Info<br /></em>
+          <em>2. Go to your chat with them<br /></em>
+          <em>3. Tap on their name and open Contact Info<br /></em>
           <em>4. Scroll down and tap Export Chat<br /></em>
           <em>5. Upload file below</em>
         </div>
@@ -79,12 +73,9 @@ export const TutorialPage: React.FC<TutorialPageProps> = ({ onNext }) => {
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>
           <button className="tutorial-submit" type="submit">Submit</button>
         </form>
-        {showError && (
-          <div className="tutorial-error">Incorrect File Type!</div>
-        )}
         <div className="tutorial-note">
           Note: Only you and social media companies own your data.<br/>
-          We don't store it. We don't sell it.
+          We don't store it! We don't sell it!
         </div>
       </div>
     </div>

@@ -1,3 +1,6 @@
+import JSZip from 'jszip';
+import type { JSZipObject } from 'jszip';
+
 export interface WhatsAppMessage {
   timestamp: Date;
   sender: string;
@@ -206,11 +209,11 @@ export class WhatsAppParser {
       if (i > 0) {
         const prevMessage = messages[i - 1];
         if (prevMessage && prevMessage.sender !== message.sender) {
-          const responseTime = message.timestamp.getTime() - prevMessage.timestamp.getTime();
+          const responseTime = (message.timestamp?.getTime?.() ?? 0) - (prevMessage.timestamp?.getTime?.() ?? 0);
           totalResponseTime += responseTime;
           responseCount++;
-          responseTimeBySender[message.sender] = (responseTimeBySender[message.sender] || 0) + responseTime;
-          responseCountBySender[message.sender] = (responseCountBySender[message.sender] || 0) + 1;
+          responseTimeBySender[message.sender] = (responseTimeBySender[message.sender] ?? 0) + responseTime;
+          responseCountBySender[message.sender] = (responseCountBySender[message.sender] ?? 0) + 1;
         }
       }
 
@@ -241,113 +244,6 @@ export class WhatsAppParser {
 }
 
 /**
- * Calculate playful ghosting risk scores for both users in a two-person chat.
- * Returns { [user]: { score, label, reasons } }
- */
-export function calculateGhostingRiskForBoth(messages: WhatsAppMessage[], stats: ReturnType<typeof WhatsAppParser.getStats>): Record<string, { score: number, label: string, reasons: string[] }> {
-  if (!messages.length || Object.keys(stats.messageCounts).length < 2) {
-    return {};
-  }
-  const participants = Object.keys(stats.messageCounts);
-  const userA = participants[0] ?? 'User A';
-  const userB = participants[1] ?? 'User B';
-  const msInDay = 1000 * 60 * 60 * 24;
-
-  // Defensive: ensure last message exists
-  const lastMsg = messages[messages.length - 1];
-  if (!lastMsg) {
-    return {};
-  }
-  const lastMsgTime = lastMsg.timestamp.getTime();
-  const twoMonthsAgo = new Date(lastMsgTime - msInDay * 60);
-
-  function hasValidTimestamp(m: WhatsAppMessage): m is WhatsAppMessage & { timestamp: Date } {
-    return !!m.timestamp && m.timestamp instanceof Date && !isNaN(m.timestamp.getTime());
-  }
-
-  const recentMessages = messages
-    .filter(hasValidTimestamp)
-    .filter(m => m.timestamp >= twoMonthsAgo && m.timestamp <= lastMsg.timestamp);
-
-  if (recentMessages.length === 0) {
-    return {};
-  }
-
-  function calcRisk(forUser: string, fromUser: string): { score: number, label: string, reasons: string[] } {
-    let score = 0;
-    const reasons: string[] = [];
-    // 1. Being left on read frequently
-    let leftOnReadCount = 0;
-    let sentCount = 0;
-    for (let i = 0; i < recentMessages.length; i++) {
-      const msg = recentMessages[i];
-      if (!msg) continue;
-      if (msg.sender === forUser) {
-        sentCount++;
-        // Check if next message is from fromUser (i.e., replied)
-        let replied = false;
-        for (let j = i + 1; j < recentMessages.length; j++) {
-          const nextMsg = recentMessages[j];
-          if (!nextMsg) continue;
-          if (nextMsg.sender === fromUser) {
-            replied = true;
-            break;
-          } else if (nextMsg.sender === forUser) {
-            break;
-          }
-        }
-        if (!replied) leftOnReadCount++;
-      }
-    }
-    // Patch: If fromUser sent zero messages in the window, and forUser sent > 0, all forUser's messages are left on read
-    const forUserMsgCount = recentMessages.filter(m => m.sender === forUser).length;
-    const fromUserMsgCount = recentMessages.filter(m => m.sender === fromUser).length;
-    if (fromUserMsgCount === 0 && forUserMsgCount > 0) {
-      leftOnReadCount = forUserMsgCount;
-      sentCount = forUserMsgCount;
-    }
-    const leftOnReadFreq = sentCount > 0 ? leftOnReadCount / sentCount : 0;
-    if (leftOnReadFreq > 0.33 && sentCount > 2) {
-      score += 40;
-      reasons.push(`You were left on read ${Math.round(leftOnReadFreq * 100)}% of the time in the last 2 months`);
-    } else if (leftOnReadFreq > 0.15 && sentCount > 2) {
-      score += 20;
-      reasons.push(`You were left on read ${Math.round(leftOnReadFreq * 100)}% of the time in the last 2 months`);
-    }
-    // 2. Lower response time
-    const forUserAvg = stats.averageResponseTimeBySender[forUser] || 0;
-    const fromUserAvg = stats.averageResponseTimeBySender[fromUser] || 0;
-    if (forUserAvg > 0 && fromUserAvg > 0 && forUserAvg < fromUserAvg * 0.7) {
-      score += 20;
-      reasons.push(`You reply much faster than ${fromUser}`);
-    }
-    // 3. Sends more messages
-    if (forUserMsgCount > 2 * fromUserMsgCount && fromUserMsgCount > 0) {
-      score += 10;
-      reasons.push(`You sent a lot more messages than ${fromUser} in the last 2 months`);
-    }
-    // 4. Shares more media
-    const forUserMediaCount = recentMessages.filter(m => m.sender === forUser && m.isMedia).length;
-    const fromUserMediaCount = recentMessages.filter(m => m.sender === fromUser && m.isMedia).length;
-    if (forUserMediaCount > 2 * fromUserMediaCount && fromUserMediaCount > 0) {
-      score += 10;
-      reasons.push(`You shared a lot more media than ${fromUser} in the last 2 months`);
-    }
-    // Clamp score and label
-    if (score > 100) score = 100;
-    let label = 'Low';
-    if (score > 60) label = 'High';
-    else if (score > 30) label = 'Medium';
-    return { score, label, reasons };
-  }
-
-  const result: Record<string, { score: number, label: string, reasons: string[] }> = {};
-  result[userA] = calcRisk(userA, userB);
-  result[userB] = calcRisk(userB, userA);
-  return result;
-}
-
-/**
  * Count all emoji in the chat messages
  */
 export function countAllEmoji(messages: WhatsAppMessage[]): number {
@@ -361,4 +257,371 @@ export function countAllEmoji(messages: WhatsAppMessage[]): number {
     }
   }
   return count;
+}
+
+/**
+ * Returns the Facts & Figures metrics for a WhatsApp chat transcript.
+ */
+export function getFactsAndFigures(messages: WhatsAppMessage[]) {
+  if (!messages.length) {
+    return {
+      totalMessages: 0,
+      totalMedia: 0,
+      totalEmojis: 0,
+      daysAndHoursSpanned: '-',
+      mostActiveDay: null,
+      longestSilence: null,
+      participants: [],
+      firstDate: null,
+      lastDate: null,
+    };
+  }
+
+  // 1. Total messages exchanged
+  const totalMessages = messages.length;
+
+  // 2. Total media shared
+  const totalMedia = messages.filter(m => m.isMedia).length;
+
+  // 3. Total emojis used
+  const emojiRegex = /[\p{Emoji}]/gu;
+  let totalEmojis = 0;
+  for (const msg of messages) {
+    if (msg.message) {
+      const matches = msg.message.match(emojiRegex);
+      if (matches) totalEmojis += matches.length;
+    }
+  }
+
+  // 4. Number of days spanning chat transcript (inclusive, calendar days)
+  const sortedMessages = [...messages].sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  let daysAndHoursSpanned = '-';
+  let firstDate: Date | null = null;
+  let lastDate: Date | null = null;
+  if (
+    sortedMessages.length > 0 &&
+    sortedMessages[0]?.timestamp !== undefined &&
+    sortedMessages[sortedMessages.length - 1]?.timestamp !== undefined
+  ) {
+    const firstTimestamp = sortedMessages[0]?.timestamp;
+    const lastTimestamp = sortedMessages[sortedMessages.length - 1]?.timestamp;
+    if (firstTimestamp && lastTimestamp) {
+      const msDiff = new Date(lastTimestamp).getTime() - new Date(firstTimestamp).getTime();
+      const days = Math.floor(msDiff / (1000 * 60 * 60 * 24)) + 1;
+      if (days >= 1) {
+        daysAndHoursSpanned = `${days} days`;
+      } else {
+        const hours = Math.floor(msDiff / (1000 * 60 * 60));
+        daysAndHoursSpanned = `${hours} hrs`;
+      }
+      firstDate = firstTimestamp;
+      lastDate = lastTimestamp;
+    }
+  }
+
+  // 5. Date of the most correspondence/chats (formatted as 'Mon DD, YYYY')
+  const messagesByDay: Record<string, number> = {};
+  for (const msg of messages) {
+    if (!msg.timestamp) continue;
+    const dayKey = msg.timestamp.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+    messagesByDay[dayKey] = (messagesByDay[dayKey] || 0) + 1;
+  }
+  let mostActiveDay: string | null = null;
+  let maxCount = 0;
+  for (const [day, count] of Object.entries(messagesByDay)) {
+    if (count > maxCount) {
+      maxCount = count;
+      mostActiveDay = day;
+    }
+  }
+  if (!mostActiveDay) mostActiveDay = null;
+
+  // 6. Longest time lapse with no conversation (X days, Y hrs)
+  let longestSilenceMs = 0;
+  for (let i = 1; i < sortedMessages.length; i++) {
+    const prev = sortedMessages[i-1];
+    const curr = sortedMessages[i];
+    if (!prev?.timestamp || !curr?.timestamp) continue;
+    const gap = curr.timestamp.getTime() - prev.timestamp.getTime();
+    if (gap > longestSilenceMs) longestSilenceMs = gap;
+  }
+  // Convert ms to X days, Y hrs
+  const days = Math.floor(longestSilenceMs / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((longestSilenceMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const longestSilence = `${days} days, ${hours} hrs`;
+
+  // Get participants as array
+  const participants = Array.from(new Set(messages.map(m => m.sender)));
+
+  let dateRange = '-';
+  if (firstDate && lastDate) {
+    const first = new Date(firstDate);
+    const last = new Date(lastDate);
+    const firstStr = first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    const lastStr = last.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+    dateRange = `${firstStr} — ${lastStr}`;
+  }
+
+  return {
+    totalMessages,
+    totalMedia,
+    totalEmojis,
+    daysAndHoursSpanned,
+    mostActiveDay,
+    longestSilence,
+    participants: Array.from(participants),
+    firstDate,
+    lastDate,
+    dateRange,
+  };
+}
+
+/**
+ * Returns Key Performance Indicators (KPIs) for each participant in a 1:1 chat.
+ */
+export function getKPIs(messages: WhatsAppMessage[]) {
+  if (!messages.length) return {};
+  // Get participants
+  const participants = Array.from(new Set(messages.map(m => m.sender)));
+  if (participants.length !== 2) return {};
+  const userA = String(participants[0]);
+  const userB = String(participants[1]);
+  const users = [userA, userB];
+
+  // 1. Initiator Ratio (48+ hour gap)
+  const INITIATION_GAP_MS = 1000 * 60 * 60 * 48;
+  let initiatorCounts: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  let lastTimestamp: Date | null = null;
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+    if (!msg) continue;
+    if (
+      i === 0 ||
+      (lastTimestamp && msg.timestamp.getTime() - lastTimestamp.getTime() >= INITIATION_GAP_MS)
+    ) {
+      initiatorCounts[msg.sender] = (initiatorCounts[msg.sender] || 0) + 1;
+    }
+    lastTimestamp = msg.timestamp;
+  }
+  const totalInitiations = (initiatorCounts[userA] ?? 0) + (initiatorCounts[userB] ?? 0);
+  const initiatorRatio: Record<string, number> = {
+    [userA]: totalInitiations > 0 ? ((initiatorCounts[userA] ?? 0) / totalInitiations) * 100 : 0,
+    [userB]: totalInitiations > 0 ? ((initiatorCounts[userB] ?? 0) / totalInitiations) * 100 : 0,
+  };
+
+  // 2. Avg. Response Time
+  let responseTimeBySender: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  let responseCountBySender: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  for (let i = 1; i < messages.length; i++) {
+    const prev = messages[i - 1];
+    const curr = messages[i];
+    if (!prev || !curr || !prev.sender || !curr.sender) continue;
+    if (prev.sender !== curr.sender) {
+      const responseTime = (curr.timestamp?.getTime?.() ?? 0) - (prev.timestamp?.getTime?.() ?? 0);
+      responseTimeBySender[curr.sender] = (responseTimeBySender[curr.sender] ?? 0) + responseTime;
+      responseCountBySender[curr.sender] = (responseCountBySender[curr.sender] ?? 0) + 1;
+    }
+  }
+  const avgResponseTime: Record<string, number> = {
+    [userA]: (responseCountBySender[userA] ?? 0) > 0 ? (responseTimeBySender[userA] ?? 0) / (responseCountBySender[userA] ?? 1) : 0,
+    [userB]: (responseCountBySender[userB] ?? 0) > 0 ? (responseTimeBySender[userB] ?? 0) / (responseCountBySender[userB] ?? 1) : 0,
+  };
+
+  // 3. Avg. Message Length (words, non-media)
+  let wordSum: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  let wordCount: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  for (const msg of messages) {
+    if (!msg.sender || !(msg.sender in wordSum) || !(msg.sender in wordCount)) continue;
+    if (!msg.isMedia && msg.message.trim().length > 0) {
+      const wc = msg.message?.trim?.().split(/\s+/).length ?? 0;
+      wordSum[msg.sender] = (wordSum[msg.sender] ?? 0) + wc;
+      wordCount[msg.sender] = (wordCount[msg.sender] ?? 0) + 1;
+    }
+  }
+  const avgMessageLength: Record<string, number> = {
+    [userA]: (wordCount[userA] ?? 0) > 0 ? (wordSum[userA] ?? 0) / (wordCount[userA] ?? 1) : 0,
+    [userB]: (wordCount[userB] ?? 0) > 0 ? (wordSum[userB] ?? 0) / (wordCount[userB] ?? 1) : 0,
+  };
+
+  // 4. Double-texts (count, 24+ hour gap, per streak)
+  const DOUBLE_TEXT_GAP_MS = 1000 * 60 * 60 * 24;
+  let doubleTexts: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  for (const user of users) {
+    let i = 0;
+    while (i < messages.length) {
+      if (messages[i]?.sender === user) {
+        let streakStart = i;
+        let streakEnd = i;
+        // Find end of streak
+        while (
+          streakEnd + 1 < messages.length &&
+          messages[streakEnd + 1]?.sender === user
+        ) {
+          streakEnd++;
+        }
+        // Check for double-text: if previous message is from other user and gap >= 24h
+        const currMsg = messages[streakStart];
+        const prevMsg = streakStart > 0 ? messages[streakStart - 1] : undefined;
+        if (
+          streakStart > 0 &&
+          currMsg && prevMsg &&
+          prevMsg.sender !== user &&
+          (currMsg.timestamp?.getTime?.() ?? 0) - (prevMsg.timestamp?.getTime?.() ?? 0) >= DOUBLE_TEXT_GAP_MS
+        ) {
+          doubleTexts[user] = (doubleTexts[user] ?? 0) + 1;
+        }
+        i = streakEnd + 1;
+      } else {
+        i++;
+      }
+    }
+  }
+
+  // 6. % Punctuation Used (per message)
+  const punctuationRegex = /[.,!?;:]/;
+  let punctCount: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  let msgCount: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  for (const msg of messages) {
+    if (!msg.sender || !(msg.sender in msgCount)) continue;
+    msgCount[msg.sender] = (msgCount[msg.sender] ?? 0) + 1;
+    if (punctuationRegex.test(msg.message ?? '')) {
+      punctCount[msg.sender] = (punctCount[msg.sender] ?? 0) + 1;
+    }
+  }
+  const percentPunctuationUsed: Record<string, number> = {
+    [userA]: (msgCount[userA] ?? 0) > 0 ? ((punctCount[userA] ?? 0) / (msgCount[userA] ?? 1)) * 100 : 0,
+    [userB]: (msgCount[userB] ?? 0) > 0 ? ((punctCount[userB] ?? 0) / (msgCount[userB] ?? 1)) * 100 : 0,
+  };
+
+  // 7. % Emoji Used (per message)
+  const emojiRegex = /[\p{Emoji}]/gu;
+  let emojiMsgCount: Record<string, number> = { [userA]: 0, [userB]: 0 };
+  for (const msg of messages) {
+    if (!msg.sender || !(msg.sender in emojiMsgCount)) continue;
+    if (emojiRegex.test(msg.message ?? '')) {
+      emojiMsgCount[msg.sender] = (emojiMsgCount[msg.sender] ?? 0) + 1;
+    }
+  }
+  const percentEmojiUsed: Record<string, number> = {
+    [userA]: (msgCount[userA] ?? 0) > 0 ? ((emojiMsgCount[userA] ?? 0) / (msgCount[userA] ?? 1)) * 100 : 0,
+    [userB]: (msgCount[userB] ?? 0) > 0 ? ((emojiMsgCount[userB] ?? 0) / (msgCount[userB] ?? 1)) * 100 : 0,
+  };
+
+  // Compose result
+  const result: Record<string, any> = {};
+  for (const user of users) {
+    result[user] = {
+      initiatorRatio: initiatorRatio[user],
+      avgResponseTime: avgResponseTime[user],
+      avgMessageLength: avgMessageLength[user],
+      doubleTexts: doubleTexts[user],
+      percentPunctuationUsed: percentPunctuationUsed[user],
+      percentEmojiUsed: percentEmojiUsed[user],
+    };
+  }
+  return result;
+}
+
+/**
+ * Returns data for a 100% stacked bar chart of messages sent by each user by period (6 bars, snapped to calendar months/weeks/days).
+ */
+export function getStackedBarData(messages: WhatsAppMessage[], facts: any) {
+  if (!messages || !Array.isArray(messages) || messages.length === 0) return [];
+  if (!facts || !Array.isArray(facts.participants) || facts.participants.length !== 2) return [];
+  const [userA, userB] = facts.participants;
+  // Get first and last date
+  const sorted = [...messages].sort((a, b) => (a && b && a.timestamp && b.timestamp ? a.timestamp.getTime() - b.timestamp.getTime() : 0));
+  if (!sorted[0]?.timestamp || !sorted[sorted.length - 1]?.timestamp) return [];
+  const firstDate = sorted[0]?.timestamp ?? new Date();
+  const lastDate = sorted[sorted.length - 1]?.timestamp ?? new Date();
+  const msDiff = lastDate.getTime() - firstDate.getTime();
+  const totalBins = 6;
+  const binSize = msDiff / totalBins;
+
+  // Generate period boundaries and labels
+  let periods: { start: Date; end: Date; label: string }[] = [];
+  for (let i = 0; i < totalBins; i++) {
+    const start = new Date(firstDate.getTime() + i * binSize);
+    const end = i === totalBins - 1 ? new Date(lastDate.getTime() + 1) : new Date(firstDate.getTime() + (i + 1) * binSize);
+    // Improved label: if same year, 'May – July 2024', else 'Dec 2024 – Jan 2025'
+    const sameYear = start.getFullYear() === end.getFullYear();
+    let label = '';
+    if (sameYear) {
+      const startMonth = start.toLocaleDateString('en-US', { month: 'short' });
+      const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
+      label = `${startMonth} – ${endMonth} ${start.getFullYear()}`;
+    } else {
+      const startMonthYear = start.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      const endMonthYear = end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+      label = `${startMonthYear} – ${endMonthYear}`;
+    }
+    periods.push({ start, end, label });
+  }
+  if (!Array.isArray(periods) || periods.length === 0) return [];
+
+  // Bin messages by period
+  const data = periods.map(period => {
+    if (!period || !period.start || !period.end) return { periodLabel: '', [userA]: 0, [userB]: 0 };
+    const start = period.start as Date;
+    const end = period.end as Date;
+    const msgs = messages.filter(m => m && m.timestamp && m.timestamp >= start && m.timestamp < end && m.sender);
+    const countA = msgs.filter(m => m.sender === userA).length;
+    const countB = msgs.filter(m => m.sender === userB).length;
+    const total = countA + countB;
+    return {
+      periodLabel: period.label,
+      [userA]: total > 0 ? Math.round((countA / total) * 100) : 0,
+      [userB]: total > 0 ? Math.round((countB / total) * 100) : 0,
+    };
+  });
+  return data;
+}
+
+// Helper to format response time in ms to 'X hr Y min'
+export function formatResponseTime(ms: number): string {
+  if (typeof ms !== 'number' || isNaN(ms) || ms <= 0) return '-';
+  const minutes = Math.round(ms / (1000 * 60));
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) return `${hours} hr${hours > 1 ? 's' : ''}${mins > 0 ? ' ' + mins + ' min' : ''}`;
+  return `${mins} min`;
+}
+
+// Helper to format percent
+export function fmtPct(val: number): string {
+  return typeof val === 'number' ? Math.round(val) + '%' : '-';
+}
+
+// Helper to format words
+export function fmtWords(val: number): string {
+  return typeof val === 'number' ? val.toFixed(1) + ' words' : '-';
+}
+
+// Helper for int
+export function fmtInt(val: number): string {
+  return typeof val === 'number' ? Math.round(val).toString() : '-';
+}
+
+/**
+ * Accepts a File (zip or txt). If zip, extracts the first .txt file and parses it. If txt, parses directly.
+ */
+export async function parseChatFile(file: File): Promise<WhatsAppMessage[]> {
+  if (file.name.endsWith('.zip')) {
+    const zip = await JSZip.loadAsync(file);
+    // Prefer _chat.txt if present, otherwise any .txt file
+    let txtFile: JSZipObject | null | undefined = zip.file('_chat.txt');
+    if (!txtFile) {
+      txtFile = Object.values(zip.files).find(f => (f as JSZipObject).name.endsWith('.txt')) as JSZipObject | undefined;
+    }
+    if (!txtFile) throw new Error('No .txt file found in zip');
+    console.log('Zip file unzipped. Found txt file:', txtFile.name);
+    const text = await txtFile.async('string');
+    console.log('Contents of extracted txt file:', text.slice(0, 500)); // log first 500 chars for brevity
+    return WhatsAppParser.parseChat(text);
+  } else if (file.name.endsWith('.txt')) {
+    const text = await file.text();
+    return WhatsAppParser.parseChat(text);
+  } else {
+    throw new Error('Unsupported file type');
+  }
 } 

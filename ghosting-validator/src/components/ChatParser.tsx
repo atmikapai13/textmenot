@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { WhatsAppParser, calculateGhostingRiskForBoth } from '../utils/whatsappParser';
+import { WhatsAppParser } from '../utils/whatsappParser';
 import type { WhatsAppMessage } from '../utils/whatsappParser';
 import { PieChart, Pie, Cell, Tooltip, Legend, ResponsiveContainer, XAxis, YAxis, CartesianGrid, BarChart, Bar } from 'recharts';
 
@@ -29,9 +29,8 @@ const COLORS = [
 ];
 
 const ChatParser: React.FC<ChatParserProps> = ({ messages: propMessages, stats: propStats }) => {
-  const [messages, setMessages] = useState<WhatsAppMessage[]>(propMessages || []);
-  const [stats, setStats] = useState<ChatStats | null>(propStats || null);
   const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState<ChatStats | null>(propStats || null);
 
   const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -42,7 +41,6 @@ const ChatParser: React.FC<ChatParserProps> = ({ messages: propMessages, stats: 
       const text = await file.text();
       const parsedMessages = WhatsAppParser.parseChat(text);
       const chatStats = WhatsAppParser.getStats(parsedMessages);
-      setMessages(parsedMessages);
       setStats(chatStats);
     } catch (error) {
       console.error('Error parsing chat:', error);
@@ -63,7 +61,6 @@ const ChatParser: React.FC<ChatParserProps> = ({ messages: propMessages, stats: 
   };
 
   // Use props if provided, otherwise use state
-  const usedMessages = propMessages || messages;
   const usedStats = propStats || stats;
 
   // Prepare data for pie chart
@@ -101,12 +98,6 @@ const ChatParser: React.FC<ChatParserProps> = ({ messages: propMessages, stats: 
       return entry;
     });
   }
-
-  // Calculate ghosting risk for both users
-  const ghostingRiskBoth = (usedMessages.length && usedStats)
-    ? calculateGhostingRiskForBoth(usedMessages, usedStats)
-    : null;
-  const participants = usedStats ? Array.from(usedStats.participants) : [];
 
   return (
     <div className="chat-parser">
@@ -247,26 +238,6 @@ const ChatParser: React.FC<ChatParserProps> = ({ messages: propMessages, stats: 
               </BarChart>
             </ResponsiveContainer>
           </div>
-          {/* Ghosting Risk Section for Both Users */}
-          {ghostingRiskBoth && participants.length === 2 && (
-            <div className="ghosting-risk-both" style={{ marginTop: 32, display: 'flex', gap: 24, justifyContent: 'center' }}>
-              {participants.map((user: string) => (
-                ghostingRiskBoth[user] ? (
-                  <div key={user} className="ghosting-risk-card" style={{ flex: 1, minWidth: 220, padding: 16, border: '1px solid #eee', borderRadius: 8, background: '#fafbfc' }}>
-                    <h4>Chances of {user} being ghosted</h4>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: ghostingRiskBoth[user].label === 'High' ? '#e74c3c' : ghostingRiskBoth[user].label === 'Medium' ? '#f39c12' : '#27ae60' }}>
-                      {ghostingRiskBoth[user].label} ({ghostingRiskBoth[user].score}%)
-                    </div>
-                    <ul style={{ marginTop: 8 }}>
-                      {ghostingRiskBoth[user].reasons.map((reason: string, idx: number) => (
-                        <li key={idx}>{reason}</li>
-                      ))}
-                    </ul>
-                  </div>
-                ) : null
-              ))}
-            </div>
-          )}
         </div>
       )}
     </div>

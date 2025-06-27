@@ -1,0 +1,494 @@
+.dashboard-root {
+  position: relative;
+  min-height: 90vh;
+  min-width: 90vw;
+  background: #FFF5F7;
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+  box-sizing: border-box;
+  font-family: 'Lora', serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.dashboard-corner {
+  position: absolute;
+  width: 180px;
+  height: 180px;
+  opacity: 1.0;
+  z-index: 2;
+}
+
+.topleft { top: -40px; left: -50px; }
+.topright { top: -40px; right: -50px; }
+.bottomleft { bottom: -30px; left: -50px; }
+.bottomright { bottom: -30px; right: -50px; }
+
+.dashboard-center-rect {
+  background: #FFE8FB;
+  border-radius: 2rem;
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+  width: 83vw;
+  height: 73vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+} 
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  z-index: 2;
+}
+.dashboard-title {
+  font-family: 'DM Serif Text', serif;
+  color: #E33CC1;
+  font-size: 2.2rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-top: 2.5rem;
+  margin-bottom: 0.0rem;
+}
+
+.dashboard-dates {
+  color: #E33CC1;
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-bottom: 1.2rem;
+  margin-top: 0.0rem;
+}
+
+.dashboard-facts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  margin-top: 0.0rem;
+  padding: 1rem 3rem;
+  margin-bottom: 2.2rem;
+  gap: 2.2rem;
+  z-index: 2;
+  position: relative;
+  
+}
+
+.dashboard-facts-title {
+  font-family: 'DM Serif Text', serif;
+  color: #682960;
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.0rem;
+  align-items: center;
+}
+
+.dashboard-facts-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 0rem;
+}
+
+.dashboard-fact {
+  font-family: 'Lora', serif;
+  text-align: center;
+  font-size: 0.1rem;
+  color: #0E2102;
+  min-width: 110px;
+  margin-top: 0.0rem;
+}
+.fact-number {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  color: #E33CC1;
+  font-weight: 700;
+  margin-top: 0.0rem;
+}
+
+.dashboard-main {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.2rem;
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 2.2rem;
+  z-index: 2;
+}
+
+.dashboard-kpi {
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  flex: 1;
+  margin-left: 2.5%;
+  margin-right: 0%;
+  box-sizing: border-box;
+}
+
+.dashboard-graphs {
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  width: 100%;
+  padding: 0rem 1.5rem;
+  flex: 1;
+  margin-left: 0%;
+  margin-right: 2.5%;
+  
+  box-sizing: border-box;
+}
+
+.kpi-title, .graphs-title {
+  font-family: 'DM Serif Text', serif;
+  color: #682960;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+.kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+.kpi-table th, .kpi-table td {
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+  font-weight: 700;
+}
+
+.kpi-table td {
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.kpi-table th {
+  font-family: 'DM Serif Text', serif;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #E33CC1;
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+}
+
+.kpi-table td {
+  font-family: 'Lora', serif;
+}
+
+.dashboard-graphs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+.graphs-title {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0rem;
+}
+.graphs-bar {
+  width: 100%;
+  background: none;
+}
+.graph-label {
+  font-size: 1rem;
+  color: #682960;
+  font-style: italic;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  margin-top: 0rem;
+}
+
+.dashboard-summary {
+  margin-top: 0rem;
+  text-align: center;
+  color: #682960;
+  font-size: 1.1rem;
+  font-family: 'Lora', serif;
+  z-index: 2;
+  font-style: italic;
+}
+.dashboard-italic {
+  font-style: italic;
+  color: #E33CC1;
+}
+
+.dashboard-share {
+  margin-top: 0.5rem;
+  text-align: center;
+  color: #FF9AEF;
+  font-family: 'DM Serif Text', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.flip-horizontal {
+  transform: scaleX(-1);
+}
+
+/* Mobile Responsive Styles */
+@media (max-width: 768px) {
+  .dashboard-root {
+    min-height: 100vh;
+    min-width: 100vw;
+    padding: 0.5rem;
+    justify-content: flex-start;
+  }
+
+  .dashboard-corner {
+    width: 80px;
+    height: 80px;
+  }
+
+  .topleft { top: -20px; left: -25px; }
+  .topright { top: -20px; right: -25px; }
+  .bottomleft { bottom: -15px; left: -25px; }
+  .bottomright { bottom: -15px; right: -25px; }
+
+  .dashboard-center-rect {
+    width: 95vw;
+    height: auto;
+    min-height: 90vh;
+    padding: 1rem;
+    border-radius: 1rem;
+    margin-top: 1rem;
+  }
+
+  .dashboard-header {
+    margin-bottom: 1rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dashboard-dates {
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+  }
+
+  .dashboard-facts {
+    padding: 0.8rem 1rem;
+    margin-bottom: 1.5rem;
+    gap: 1.5rem;
+  }
+
+  .dashboard-facts-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .dashboard-facts-row {
+    flex-direction: column;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .dashboard-fact {
+    font-size: 0.9rem;
+    min-width: auto;
+    width: 100%;
+    max-width: 200px;
+  }
+
+  .fact-number {
+    font-size: 1.2rem;
+  }
+
+  .dashboard-main {
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .dashboard-kpi,
+  .dashboard-graphs {
+    margin-left: 0;
+    margin-right: 0;
+    padding: 1rem;
+  }
+
+  .kpi-title,
+  .graphs-title {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .kpi-table {
+    font-size: 0.8rem;
+  }
+
+  .kpi-table th,
+  .kpi-table td {
+    padding: 0.2rem 0.3rem;
+  }
+
+  .kpi-table th {
+    font-size: 0.9rem;
+  }
+
+  .graphs-bar {
+    height: 200px;
+  }
+
+  .graph-label {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-summary {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+    padding: 0 0.5rem;
+  }
+
+  .dashboard-share {
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .dashboard-root {
+    padding: 0.3rem;
+  }
+
+  .dashboard-center-rect {
+    width: 98vw;
+    padding: 0.8rem;
+    border-radius: 0.8rem;
+  }
+
+  .dashboard-title {
+    font-size: 1.3rem;
+    margin-top: 1rem;
+  }
+
+  .dashboard-dates {
+    font-size: 0.8rem;
+  }
+
+  .dashboard-facts {
+    padding: 0.6rem 0.8rem;
+    gap: 1rem;
+  }
+
+  .dashboard-facts-title {
+    font-size: 1.1rem;
+  }
+
+  .dashboard-fact {
+    font-size: 0.8rem;
+  }
+
+  .fact-number {
+    font-size: 1.1rem;
+  }
+
+  .dashboard-kpi,
+  .dashboard-graphs {
+    padding: 0.8rem;
+  }
+
+  .kpi-title,
+  .graphs-title {
+    font-size: 1.1rem;
+  }
+
+  .kpi-table {
+    font-size: 0.7rem;
+  }
+
+  .kpi-table th,
+  .kpi-table td {
+    padding: 0.15rem 0.2rem;
+  }
+
+  .graphs-bar {
+    height: 180px;
+  }
+
+  .graph-label {
+    font-size: 0.8rem;
+  }
+
+  .dashboard-summary {
+    font-size: 0.9rem;
+  }
+
+  .dashboard-share {
+    font-size: 0.9rem;
+  }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+  .dashboard-center-rect {
+    height: 85vh;
+    overflow-y: auto;
+  }
+
+  .dashboard-facts-row {
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .dashboard-fact {
+    flex: 0 0 calc(33.333% - 1rem);
+    min-width: 120px;
+  }
+
+  .dashboard-main {
+    flex-direction: row;
+    gap: 1rem;
+  }
+
+  .dashboard-kpi,
+  .dashboard-graphs {
+    flex: 1;
+  }
+}
+
+/* Ensure touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+  .dashboard-share {
+    padding: 0.5rem 1rem;
+    min-height: 44px;
+    display: inline-block;
+  }
+
+  .kpi-table th,
+  .kpi-table td {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
