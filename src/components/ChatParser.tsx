@@ -101,7 +101,9 @@ const ChatParser: React.FC<ChatParserProps> = ({ messages: propMessages, stats: 
 
   return (
     <div className="chat-parser">
-      <h2>WhatsApp Chat Parser</h2>
+      <h2>
+        <span role="img" aria-label="heart">💗</span> He'll Text Me. He'll Text Me Not.
+      </h2>
       {/* Only show upload if not using props */}
       {!propMessages && (
         <div className="upload-section">
