@@ -116,7 +116,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
             alignItems: 'center',
             width: "auto",
             margin: '0 auto',
-            fontSize: '1.2rem',
+            fontSize: '1.0rem',
             fontWeight: 'bold',
             marginTop: '0.0rem',
             marginBottom: '0',
@@ -150,14 +150,14 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           
         </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title">Avg. Message Length</div>
+      <div className="dashboard-fact-title">Avg. Message Length (words)</div>
       
       <div className="dashboard-fact-numbers-row">
         <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
-          {kpis[userA]?.avgMessageLength !== undefined ? kpis[userA].avgMessageLength.toFixed(1) + ' words' : '-'}
+          {kpis[userA]?.avgMessageLength !== undefined ? kpis[userA].avgMessageLength.toFixed(1) : '-'}
         </span>
         <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
-          {kpis[userB]?.avgMessageLength !== undefined ? kpis[userB].avgMessageLength.toFixed(1) + ' words' : '-'}
+          {kpis[userB]?.avgMessageLength !== undefined ? kpis[userB].avgMessageLength.toFixed(1) : '-'}
         </span>
       </div>
       

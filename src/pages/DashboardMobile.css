@@ -111,7 +111,7 @@
   .dashboard-facts-title {
     font-family: 'DM Serif Text', serif;
     color: #682960;
-    font-size: 1rem;
+    font-size: 1.5rem;
     font-style: italic;
     font-weight: bold;
     text-align: center;
@@ -136,11 +136,11 @@
     color: #0E2102;
     min-width: 110px;
     margin-top: 0.0rem;
-    font-weight: 700;
+    font-weight: 500;
   }
   .fact-number {
     font-family: 'Lora', serif;
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     color: #E33CC1;
     font-weight: 700;
     margin-top: 0.0rem;
