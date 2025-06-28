@@ -77,7 +77,7 @@
   .dashboard-title {
     font-family: 'DM Serif Text', serif;
     color: #E33CC1;
-    font-size: 2rem;
+    font-size: 1.7rem;
     font-weight: bold;
     font-style: italic;
     margin-top: 2.5rem;
@@ -154,6 +154,11 @@
     width: 85%;  /* Or 100% if you want them to stretch */
     margin: 0 auto;
     margin-bottom: 0.0rem;
+  }
+  .graphs-bar {
+    width: 100%;
+    
+    background: none;
   }
 }
 

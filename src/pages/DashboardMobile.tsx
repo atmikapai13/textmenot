@@ -126,7 +126,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
             <span>{userB}</span>
           </div>
           <div className="dashboard-fact" style={{ marginTop: "-15px" }}>
-            <div className="dashboard-fact-title">Initiator Ratio</div>
+            <div className="dashboard-fact-title" style={{fontWeight: '700'}}>Initiator Ratio</div>
             <div className="dashboard-fact-numbers-row" style={{display: "flex", justifyContent: "center", gap: "80px", width: "auto", margin: "0 auto"}}>
               <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
                 {kpis[userA]?.initiatorRatio !== undefined ? Math.round(kpis[userA].initiatorRatio) + '%' : '-'}
@@ -138,7 +138,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
             
           </div>
         <div className="dashboard-fact" style={{ marginTop: 0 }}>
-        <div className="dashboard-fact-title">Avg. Response Time</div>
+        <div className="dashboard-fact-title" style={{fontWeight: '700'}}>Avg. Response Time</div>
           <div className="dashboard-fact-numbers-row" style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
             <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
               {kpis[userA]?.avgResponseTime !== undefined ? formatResponseTime(kpis[userA].avgResponseTime) : '-'}
@@ -150,7 +150,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           
         </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title">Avg. Message Length (words)</div>
+      <div className="dashboard-fact-title" style={{fontWeight: '700'}}>Avg. Message Length (words)</div>
       
       <div className="dashboard-fact-numbers-row">
         <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
@@ -163,7 +163,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
       
     </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title">Double-texts</div>
+      <div className="dashboard-fact-title" style={{fontWeight: '700'}}>Double-texts</div>
         <div className="dashboard-fact-numbers-row" style={{display: "flex", justifyContent: "center", gap: "100px",width: "auto",margin: "0 auto"}}>
           <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
             {kpis[userA]?.doubleTexts !== undefined ? kpis[userA].doubleTexts.toLocaleString() : '-'}
@@ -175,7 +175,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
         
       </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title">% Punctuation Used</div>
+      <div className="dashboard-fact-title" style={{fontWeight: '700'}}>% Punctuation Used</div>
         <div className="dashboard-fact-numbers-row" style={{display: "flex", justifyContent: "center", gap: "100px", width: "auto", margin: "0 auto"}}>
           <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
             {kpis[userA]?.percentPunctuationUsed !== undefined
@@ -191,7 +191,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
         
       </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title">% Emoji Used</div>
+      <div className="dashboard-fact-title" style={{fontWeight: '700'}}>% Emoji Used</div>
         <div className="dashboard-fact-numbers-row" style={{
                 display: "flex",
                 justifyContent: "center",
@@ -219,14 +219,14 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           
           <div style={{fontSize: '1.2rem', fontWeight: 'bold', marginTop: '-15px', color: '#682960'}}>Message Equity Index</div>
           <div className="graphs-bar">
-            <ResponsiveContainer width="100%" height={180} minWidth={200} minHeight={100}>
-              <BarChart data={barData} margin={{ top: -10, right: -8, left: -25, bottom: 0 }}>
+            <ResponsiveContainer width="100%" height={200} minWidth={250} minHeight={100}>
+              <BarChart data={barData} margin={{ top: -30, right: -8, left: -30, bottom: 0 }}>
                 <XAxis
                   dataKey="periodLabel" tick={CustomXAxisTick} interval={0}
                 />
                 <YAxis domain={[0, 100]} tick={{ fontSize: '0.7rem' }} ticks={[0, 100]} tickFormatter={v => `${v}%`} />
                 <Tooltip content={<CustomTooltip />} />
-                <Legend verticalAlign="bottom" align="center" layout="horizontal" iconType="rect" height={30} wrapperStyle={{ fontSize: '0.5rem', marginTop: 0, marginBottom: -20, marginLeft: 30 }} />
+                <Legend verticalAlign="bottom" align="center" layout="horizontal" iconType="rect" height={30} wrapperStyle={{ fontSize: '0.5rem', marginTop: 0, marginBottom: -20, marginLeft: 20 }} />
                 <Bar dataKey={userA} stackId="a" fill={COLORS[0]} name={userA} />
                 <Bar dataKey={userB} stackId="a" fill={COLORS[1]} name={userB} />
               </BarChart>
