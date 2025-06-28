@@ -17,7 +17,7 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNext }) => {
     <div className="landing-root">
       <div className="landing-content">
         <h1 className="landing-heading">He'll Text Me.</h1>
-        <img src="public/rose.gif" alt="rose" className="landing-rose" />
+        <img src={`${import.meta.env.BASE_URL}rose.gif`} alt="rose" className="landing-rose" />
         <h2 className="landing-heading">He'll Text Me Not...</h2>
         <div className="landing-body">
           <p className="landing-intro">

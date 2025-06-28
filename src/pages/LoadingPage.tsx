@@ -52,7 +52,7 @@ export const LoadingPage: React.FC = () => {
   return (
     <div className="loading-root">
       <h1 className="landing-heading" style={{ marginTop: '28vh' }}>He'll Text Me.</h1>
-      <img src="public/rose.gif" alt="rose" className="landing-rose" />
+      <img src={`${import.meta.env.BASE_URL}rose.gif`} alt="rose" className="landing-rose" />
       <h2 className="landing-heading">
             He'll Text Me Not
             <span className={`loading-dot${dotCount > 0 ? ' visible' : ''}`}>.</span>
