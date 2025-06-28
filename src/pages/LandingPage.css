@@ -105,6 +105,7 @@
   }
   .landing-content {
     max-width: 98vw;
+    height: 100dvh;
     padding: 1.2rem 0.2rem;
   }
   .landing-heading {

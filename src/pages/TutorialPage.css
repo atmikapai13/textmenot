@@ -127,8 +127,8 @@
 
 @media (max-width: 600px) {
   .tutorial-root {
-    height: auto;
-    min-height: 100vh;
+    height: 100dvh;
+    min-height: 100dvh;
     padding: 0.5rem;
   }
   .tutorial-content {

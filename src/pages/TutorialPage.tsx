@@ -47,7 +47,7 @@ export const TutorialPage: React.FC<TutorialPageProps> = () => {
           <em>1. Open WhatsApp on your phone<br /></em>
           <em>2. Go to your chat with them<br /></em>
           <em>3. Tap on their name and open Contact Info<br /></em>
-          <em>4. Scroll down and tap Export Chat<br /></em>
+          <em>4. Scroll down and tap Export Chat without media<br /></em>
           <em>5. Upload file below</em>
         </div>
         <div

@@ -252,8 +252,8 @@
 /* Mobile Responsive Styles */
 @media (max-width: 768px) {
   .dashboard-root {
-    min-height: 100vh;
-    min-width: 100vw;
+    min-height: 100dvh;
+    min-width: 98vw;
     padding: 0.5rem;
     justify-content: flex-start;
   }
