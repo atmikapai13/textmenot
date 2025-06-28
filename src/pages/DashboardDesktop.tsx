@@ -166,6 +166,7 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
             <span className="dashboard-share" onClick={handleRestart} style={{ cursor: 'pointer' }}>
               Restart 🔄
             </span>
+            <br />
             <span className="dashboard-share" onClick={handleCopyUrl} style={{ cursor: 'pointer' }}>
               {showCopied ? 'Copied!' : 'helltextmenot.com'}
             </span>
