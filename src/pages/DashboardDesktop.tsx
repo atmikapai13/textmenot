@@ -1,9 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect , useRef} from 'react';
 import './DashboardDesktop.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useLocation } from 'react-router-dom';
 import { getStackedBarData, formatResponseTime, fmtPct, fmtWords, fmtInt } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
 
 
 
@@ -13,6 +14,7 @@ export default function DashboardDesktop() {
 const COLORS = ['#E33CC1', '#FF9AEF'];
   
   // State for dashboard data
+  const dashboardImageRef = useRef<HTMLDivElement>(null);
   const [facts] = useState((location.state && (location.state as any).facts) || {});
   const [kpis] = useState((location.state && (location.state as any).kpis) || {});
   const [barData, setBarData] = useState<any[]>(
@@ -39,10 +41,23 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
   const handleRestart = () => {
       navigate('/tutorial');
   };
-  const handleShare = () => {
-    // Placeholder for future share functionality
-    alert('Share functionality coming soon!');
+  const [showCopied, setShowCopied] = useState(false);
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText('https://atmikapai13.github.io/ghosting_validator/');
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 1500);
   };
+  const handleShare = async () => {
+    if (dashboardImageRef.current) {
+      const canvas = await html2canvas(dashboardImageRef.current, { useCORS: true });
+      const image = canvas.toDataURL('image/png');
+      // Download the image
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'dashboard.png';
+      link.click();
+    }
+   };
 
   // Custom Tooltip for BarChart
   const CustomTooltip = ({ active, payload, label }: any) => {
@@ -73,7 +88,7 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
   };
 
   return (
-    <div className="dashboard-root">
+    <div className="dashboard-root" ref={dashboardImageRef}>
       {/* Corner decorations */}
       <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="corner" className="dashboard-corner topleft" />
       <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="corner" className="dashboard-corner topright flip-horizontal" />
@@ -150,6 +165,9 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
             </span>
             <span className="dashboard-share" onClick={handleRestart} style={{ cursor: 'pointer' }}>
               Restart 🔄
+            </span>
+            <span className="dashboard-share" onClick={handleCopyUrl} style={{ cursor: 'pointer' }}>
+              {showCopied ? 'Copied!' : 'helltextmenot.com'}
             </span>
           </div>
         </div>

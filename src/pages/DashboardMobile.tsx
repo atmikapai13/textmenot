@@ -90,11 +90,11 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   };
 
   return (
-    <div className="dashboard-mobile-root">
+    <div className="dashboard-mobile-root" ref={dashboardImageRef}>
       
 
       {/* Inner rectangle */}
-      <div className="dashboard-mobile-inner" ref={dashboardImageRef}>
+      <div className="dashboard-mobile-inner" >
         {/* Corner roses */}
         <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner topleft" />
         <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner topright" />
@@ -163,7 +163,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           
         </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title" style={{fontWeight: '700'}}>Avg. Message Length (words)</div>
+      <div className="dashboard-fact-title" style={{display: "flex", justifyContent: "center", gap: "50px", width: "auto", margin: "0 auto"}}>Avg. Message Length (words)</div>
       
       <div className="dashboard-fact-numbers-row">
         <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
