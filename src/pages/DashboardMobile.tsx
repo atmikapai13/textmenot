@@ -1,9 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './DashboardMobile.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { getStackedBarData, formatResponseTime } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
+import html2canvas from 'html2canvas';
 
 
 interface DashboardProps {}
@@ -17,19 +18,33 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   const userA = participants[0] || 'User A';
   const userB = participants[1] || 'User B';
   const dateRange = facts.dateRange || '-';
+  const dashboardImageRef = useRef<HTMLDivElement>(null);
   const [barData, setBarData] = useState<any[]>(
     (location.state && (location.state as any).barData) || []
   );
    // Share functionality
    const navigate = useNavigate();
+   const [showCopied, setShowCopied] = useState(false);
 
    const handleRestart = () => {
        navigate('/tutorial');
    };
-   const handleShare = () => {
-     // Placeholder for future share functionality
-     alert('Share functionality coming soon!');
+   const handleShare = async () => {
+    if (dashboardImageRef.current) {
+      const canvas = await html2canvas(dashboardImageRef.current, { useCORS: true });
+      const image = canvas.toDataURL('image/png');
+      // Download the image
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'dashboard.png';
+      link.click();
+    }
    };
+   const handleCopyUrl = () => {
+    navigator.clipboard.writeText('https://atmikapai13.github.io/ghosting_validator/');
+    setShowCopied(true);
+    setTimeout(() => setShowCopied(false), 1500);
+  };
 
   // If barData is empty but messages+facts are available, recalculate barData
   useEffect(() => {
@@ -74,14 +89,12 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
     );
   };
 
-  // Place this before the return statement in the DashboardMobile component
-  console.log('barData', barData);
   return (
     <div className="dashboard-mobile-root">
       
 
       {/* Inner rectangle */}
-      <div className="dashboard-mobile-inner">
+      <div className="dashboard-mobile-inner" ref={dashboardImageRef}>
         {/* Corner roses */}
         <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner topleft" />
         <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner topright" />
@@ -243,6 +256,11 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
             <span className="dashboard-share" onClick={handleRestart} style={{ cursor: 'pointer' }}>
               Restart 🔄
             </span>
+            
+            <span className="dashboard-share" onClick={handleCopyUrl} style={{ cursor: 'pointer' }}>
+              {showCopied ? 'Copied!' : 'helltextmenot.com'}
+            </span>
+            
           </div>
         </div>
       </div>

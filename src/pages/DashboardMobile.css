@@ -160,6 +160,16 @@
     
     background: none;
   }
+  .dashboard-footer {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #FF9AEF;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+    letter-spacing: 0.5px;
+  }
+  
 }
 
 
