@@ -3,6 +3,7 @@ import { useLocation } from 'react-router-dom';
 import './DashboardMobile.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { getStackedBarData, formatResponseTime } from '../utils/whatsappParser';
+import { useNavigate } from 'react-router-dom';
 
 
 interface DashboardProps {}
@@ -19,6 +20,16 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   const [barData, setBarData] = useState<any[]>(
     (location.state && (location.state as any).barData) || []
   );
+   // Share functionality
+   const navigate = useNavigate();
+
+   const handleRestart = () => {
+       navigate('/tutorial');
+   };
+   const handleShare = () => {
+     // Placeholder for future share functionality
+     alert('Share functionality coming soon!');
+   };
 
   // If barData is empty but messages+facts are available, recalculate barData
   useEffect(() => {
@@ -209,7 +220,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           <div style={{fontSize: '1.2rem', fontWeight: 'bold', marginTop: '-15px', color: '#682960'}}>Message Equity Index</div>
           <div className="graphs-bar">
             <ResponsiveContainer width="100%" height={180} minWidth={200} minHeight={100}>
-              <BarChart data={barData} margin={{ top: 0, right: -5, left: -30, bottom: 0 }}>
+              <BarChart data={barData} margin={{ top: -10, right: -8, left: -25, bottom: 0 }}>
                 <XAxis
                   dataKey="periodLabel" tick={CustomXAxisTick} interval={0}
                 />
@@ -220,6 +231,18 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
                 <Bar dataKey={userB} stackId="a" fill={COLORS[1]} name={userB} />
               </BarChart>
             </ResponsiveContainer>
+          </div>
+        </div>
+        <div className="dashboard-summary">
+          We'll let you derive your own conclusions. Happy analyzing!<br />
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
+            <span className="dashboard-share" onClick={handleShare} style={{ cursor: 'pointer' }}>
+              Share these results 🌹
+            </span>
+            
+            <span className="dashboard-share" onClick={handleRestart} style={{ cursor: 'pointer' }}>
+              Restart 🔄
+            </span>
           </div>
         </div>
       </div>
