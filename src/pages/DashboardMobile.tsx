@@ -1,21 +1,232 @@
-/* DashboardMobile.css - Mobile-specific styles for Dashboard page */
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
+import './DashboardMobile.css';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { getStackedBarData, formatResponseTime } from '../utils/whatsappParser';
 
-.dashboard-mobile-root {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  padding: 1rem;
-  background: #FFF5F7;
-  min-height: 100vh;
-}
 
-.dashboard-mobile-header,
-.dashboard-mobile-facts,
-.dashboard-mobile-kpis,
-.dashboard-mobile-graphs,
-.dashboard-mobile-summary {
-  margin-bottom: 1.2rem;
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1rem;
-} 
+interface DashboardProps {}
+
+const DashboardMobile: React.FC<DashboardProps> = () => {
+  const location = useLocation();
+  const COLORS = ['#E33CC1', '#FF9AEF'];
+  const facts = (location.state && (location.state as any).facts) || {};
+  const kpis = (location.state && (location.state as any).kpis) || {};
+  const participants = Array.isArray(facts.participants) ? facts.participants : [];
+  const userA = participants[0] || 'User A';
+  const userB = participants[1] || 'User B';
+  const dateRange = facts.dateRange || '-';
+  const [barData, setBarData] = useState<any[]>(
+    (location.state && (location.state as any).barData) || []
+  );
+
+  // If barData is empty but messages+facts are available, recalculate barData
+  useEffect(() => {
+    if (barData.length === 0 && location.state && (location.state as any).messages && ((location.state as any).facts)) {
+      const messages = (location.state as any).messages;
+      const factsInit = (location.state as any).facts;
+      setBarData(getStackedBarData(messages, factsInit));
+    }
+  }, [barData.length, location.state]);
+  
+  // Custom Tooltip for BarChart
+  const CustomTooltip = ({ active, payload, label }: any) => {
+    if (active && payload && payload.length) {
+      return (
+        <div className="custom-tooltip" style={{ background: '#fff8fd', border: '1px solid #E33CC1', borderRadius: '8px', padding: '0.7em 1em', color: '#682960' }}>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
+          <div><span style={{ color: COLORS[0], fontWeight: 700 }}>{userA}:</span> {payload[0].value}%</div>
+          <div><span style={{ color: COLORS[1], fontWeight: 700 }}>{userB}:</span> {payload[1].value}%</div>
+        </div>
+      );
+    }
+    return null;
+  };
+
+  // Custom XAxis tick for rotated, multi-line labels
+  const CustomXAxisTick = (props: any) => {
+    const { x, y, payload } = props;
+    const parts = payload.value.split(/ – | - /);
+    return (
+      <g transform={`translate(${x},${y})`}>
+        <text
+          textAnchor="end"
+          fontSize="0.7rem"
+          fill="#682960"
+          dy={10}
+          transform="rotate(-45)"
+        >
+          <tspan x="0" dy="0">{parts[0]}{parts[1] ? ' –' : ''}</tspan>
+          {parts[1] && <tspan x="0" dy="12">{parts[1]}</tspan>}
+        </text>
+      </g>
+    );
+  };
+
+  // Place this before the return statement in the DashboardMobile component
+  console.log('barData', barData);
+  return (
+    <div className="dashboard-mobile-root">
+      
+
+      {/* Inner rectangle */}
+      <div className="dashboard-mobile-inner">
+        {/* Corner roses */}
+        <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner topleft" />
+        <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner topright" />
+        <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner bottomleft" />
+        <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="dashboard-mobile-corner bottomright" />
+        {/* Your mobile dashboard content goes here */}
+        <div className="dashboard-mobile-content">
+        {/* <pre>{JSON.stringify({ facts, kpis, barData, messages }, null, 2)}</pre> */}
+        <div className="dashboard-header">
+          <div className="dashboard-title">{userA} <span role="img" aria-label="heart">❤️</span> {userB}</div>
+          <div className="dashboard-dates">{dateRange}</div>
+        </div>
+        
+        <div className="dashboard-facts">
+          <div className="dashboard-facts-title" style={{marginBottom: '-15px'}}>Facts & Figures</div>
+          <div className="dashboard-facts-column">
+            <div className="dashboard-fact" style={{marginTop: '-15px'}}><span className="fact-number" style={{ marginTop: 0 }}>{typeof facts.totalMessages === 'number' ? facts.totalMessages.toLocaleString() : '-'}</span><br />Messages Exchanged</div>
+            <div className="dashboard-fact" style={{marginBottom: '0.0rem'}}><span className="fact-number">{typeof facts.totalMedia === 'number' ? facts.totalMedia.toLocaleString() : '-'}</span><br />Media Shared</div>
+            <div className="dashboard-fact" style={{marginBottom: '0.0rem'}}><span className="fact-number">{typeof facts.totalEmojis === 'number' ? facts.totalEmojis.toLocaleString() : '-'}</span><br />Emoji Abused</div>
+            <div className="dashboard-fact" style={{marginBottom: '0.0rem'}}><span className="fact-number">{typeof facts.daysAndHoursSpanned === 'string' ? facts.daysAndHoursSpanned : '-'}</span><br />Time Elapsed</div>
+            <div className="dashboard-fact"><span className="fact-number">{facts.mostActiveDay ?? '-'}</span><br />Most Active Day</div>
+            <div className="dashboard-fact"><span className="fact-number">{facts.longestSilence ?? '-'}</span><br />Longest Silence</div>
+          </div>
+        </div>
+
+        <div className="dashboard-facts">
+          <div className="dashboard-facts-title">Key Performance Indicators</div>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: "80px",
+            alignItems: 'center',
+            width: "auto",
+            margin: '0 auto',
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+            marginTop: '0.0rem',
+            marginBottom: '0',
+            color: '#682960'
+          }}>
+            <span>{userA}</span>
+            <span>{userB}</span>
+          </div>
+          <div className="dashboard-fact" style={{ marginTop: "-15px" }}>
+            <div className="dashboard-fact-title">Initiator Ratio</div>
+            <div className="dashboard-fact-numbers-row" style={{display: "flex", justifyContent: "center", gap: "80px", width: "auto", margin: "0 auto"}}>
+              <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+                {kpis[userA]?.initiatorRatio !== undefined ? Math.round(kpis[userA].initiatorRatio) + '%' : '-'}
+              </span>
+              <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+                {kpis[userB]?.initiatorRatio !== undefined ? Math.round(kpis[userB].initiatorRatio) + '%' : '-'}
+              </span>
+            </div>
+            
+          </div>
+        <div className="dashboard-fact" style={{ marginTop: 0 }}>
+        <div className="dashboard-fact-title">Avg. Response Time</div>
+          <div className="dashboard-fact-numbers-row" style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
+            <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+              {kpis[userA]?.avgResponseTime !== undefined ? formatResponseTime(kpis[userA].avgResponseTime) : '-'}
+            </span>
+            <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+              {kpis[userB]?.avgResponseTime !== undefined ? formatResponseTime(kpis[userB].avgResponseTime) : '-'}
+            </span>
+          </div>
+          
+        </div>
+      <div className="dashboard-fact" style={{ marginTop: 0 }}>
+      <div className="dashboard-fact-title">Avg. Message Length</div>
+      
+      <div className="dashboard-fact-numbers-row">
+        <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+          {kpis[userA]?.avgMessageLength !== undefined ? kpis[userA].avgMessageLength.toFixed(1) + ' words' : '-'}
+        </span>
+        <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+          {kpis[userB]?.avgMessageLength !== undefined ? kpis[userB].avgMessageLength.toFixed(1) + ' words' : '-'}
+        </span>
+      </div>
+      
+    </div>
+      <div className="dashboard-fact" style={{ marginTop: 0 }}>
+      <div className="dashboard-fact-title">Double-texts</div>
+        <div className="dashboard-fact-numbers-row" style={{display: "flex", justifyContent: "center", gap: "100px",width: "auto",margin: "0 auto"}}>
+          <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+            {kpis[userA]?.doubleTexts !== undefined ? kpis[userA].doubleTexts.toLocaleString() : '-'}
+          </span>
+          <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+            {kpis[userB]?.doubleTexts !== undefined ? kpis[userB].doubleTexts.toLocaleString() : '-'}
+          </span>
+        </div>
+        
+      </div>
+      <div className="dashboard-fact" style={{ marginTop: 0 }}>
+      <div className="dashboard-fact-title">% Punctuation Used</div>
+        <div className="dashboard-fact-numbers-row" style={{display: "flex", justifyContent: "center", gap: "100px", width: "auto", margin: "0 auto"}}>
+          <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+            {kpis[userA]?.percentPunctuationUsed !== undefined
+              ? Math.round(kpis[userA].percentPunctuationUsed) + '%'
+              : '-'}
+          </span>
+          <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+            {kpis[userB]?.percentPunctuationUsed !== undefined
+              ? Math.round(kpis[userB].percentPunctuationUsed) + '%'
+              : '-'}
+          </span>
+        </div>
+        
+      </div>
+      <div className="dashboard-fact" style={{ marginTop: 0 }}>
+      <div className="dashboard-fact-title">% Emoji Used</div>
+        <div className="dashboard-fact-numbers-row" style={{
+                display: "flex",
+                justifyContent: "center",
+                gap: "100px",
+                width: "auto",
+                margin: "0 auto"
+              }}>
+          <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+            {kpis[userA]?.percentEmojiUsed !== undefined
+              ? Math.round(kpis[userA].percentEmojiUsed) + '%'
+              : '-'}
+          </span>
+          <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+            {kpis[userB]?.percentEmojiUsed !== undefined
+              ? Math.round(kpis[userB].percentEmojiUsed) + '%'
+              : '-'}
+          </span>
+        </div>
+        
+      </div>
+        </div>
+        </div>
+        <div className="dashboard-facts">
+          <div className="dashboard-facts-title" style={{marginBottom: '0'}}>Graphs</div>
+          
+          <div style={{fontSize: '1.2rem', fontWeight: 'bold', marginTop: '-15px', color: '#682960'}}>Message Equity Index</div>
+          <div className="graphs-bar">
+            <ResponsiveContainer width="100%" height={180} minWidth={200} minHeight={100}>
+              <BarChart data={barData} margin={{ top: 0, right: -5, left: -30, bottom: 0 }}>
+                <XAxis
+                  dataKey="periodLabel" tick={CustomXAxisTick} interval={0}
+                />
+                <YAxis domain={[0, 100]} tick={{ fontSize: '0.7rem' }} ticks={[0, 100]} tickFormatter={v => `${v}%`} />
+                <Tooltip content={<CustomTooltip />} />
+                <Legend verticalAlign="bottom" align="center" layout="horizontal" iconType="rect" height={30} wrapperStyle={{ fontSize: '0.5rem', marginTop: 0, marginBottom: -20, marginLeft: 30 }} />
+                <Bar dataKey={userA} stackId="a" fill={COLORS[0]} name={userA} />
+                <Bar dataKey={userB} stackId="a" fill={COLORS[1]} name={userB} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+  
+};
+
+export default DashboardMobile;
+

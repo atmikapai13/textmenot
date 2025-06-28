@@ -4,7 +4,7 @@ import { LandingPage } from './pages/LandingPage.tsx'
 import { TutorialPage } from './pages/TutorialPage.tsx'
 import { LoadingPage } from './pages/LoadingPage.tsx'
 import ChatParser from './components/ChatParser'
-import { Dashboard } from './pages/Dashboard'
+import Dashboard from './pages/Dashboard.tsx'
 
 function LandingPageWithNav() {
   const navigate = useNavigate()

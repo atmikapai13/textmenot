@@ -1,21 +1,160 @@
-/* DashboardMobile.css - Mobile-specific styles for Dashboard page */
+@media (max-width: 950px) {
+  body, html {
+    background: #FFF5F7;
+    font-family: 'Lora', serif;
+  }
+  .dashboard-mobile-root {
+    position: relative;
+    min-height: 100vh;
+    background: #FFF5F7;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100vw;
+    overflow-x: hidden;
+    font-family: 'Lora', serif;
+  }
 
-.dashboard-mobile-root {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  padding: 1rem;
-  background: #FFF5F7;
-  min-height: 100vh;
+  .dashboard-mobile-inner {
+    position: relative;
+    width: 90vw;
+    background: #FFE8FB;
+    border-radius: 1.5rem;
+    margin-top: 48px;
+    margin-bottom: 48px;
+    min-height: 0;
+    padding: 1.5rem 1rem 2.5rem 1rem;
+    box-sizing: border-box;
+    z-index: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: visible;
+  }
+  .dashboard-mobile-content {
+    width: 100%;
+    overflow-y: auto;
+    /* add max-height if you want to limit the scroll area */
+  }
+
+  .dashboard-mobile-corner {
+    position: absolute;
+    width: 80px;
+    height: 90px;
+    z-index: 2;
+    pointer-events: none;
+    opacity: 1.0;
+  }
+  
+  .dashboard-mobile-corner.topleft {
+    top: -40px;
+    left: -20px;
+  }
+  .dashboard-mobile-corner.topright {
+    top: -40px;
+    right: -20px;
+    transform: scaleX(-1);
+  }
+  .dashboard-mobile-corner.bottomleft {
+    bottom: -40px;
+    left: -20px;
+  }
+  .dashboard-mobile-corner.bottomright {
+    bottom: -40px;
+    right: -20px;
+    transform: scaleX(-1);
+  }
+
+  .dashboard-header {
+    text-align: center;
+    margin-bottom: 1.2rem;
+    z-index: 2;
+  }
+
+  .dashboard-title {
+    font-family: 'DM Serif Text', serif;
+    color: #E33CC1;
+    font-size: 2rem;
+    font-weight: bold;
+    font-style: italic;
+    margin-top: 2.5rem;
+    margin-bottom: 0.0rem;
+  }
+  
+  .dashboard-dates {
+    color: #E33CC1;
+    font-size: 1.1rem;
+    font-style: italic;
+    margin-bottom: 1.2rem;
+    margin-top: 0.0rem;
+  }
+
+
+.dashboard-facts {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: stretch;
+    background: #fff8fd;
+    border-radius: 1.2rem;
+    width: 70%;
+    max-width: 350px;
+    margin-left: auto;
+    margin-right: auto;
+    z-index: 2;
+    position: relative;
+  }
+  
+  .dashboard-facts-title {
+    font-family: 'DM Serif Text', serif;
+    color: #682960;
+    font-size: 1.5rem;
+    font-style: italic;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 0rem !important;
+    align-items: center;
+  }
+  
+  .dashboard-facts-column {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1.0rem;
+    width: 100%;
+    margin-top: 0rem !important;
+  }
+  
+  .dashboard-fact {
+    font-family: 'Lora', serif;
+    text-align: center;
+    font-size: 1.0rem;
+    color: #0E2102;
+    min-width: 110px;
+    margin-top: 0.0rem;
+    font-weight: 700;
+  }
+  .fact-number {
+    font-family: 'Lora', serif;
+    font-size: 1.5rem;
+    color: #E33CC1;
+    font-weight: 700;
+    margin-top: 0.0rem;
+  }
+  .dashboard-fact-numbers-row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.8rem; 
+    width: 85%;  /* Or 100% if you want them to stretch */
+    margin: 0 auto;
+    margin-bottom: 0.0rem;
+  }
 }
 
-.dashboard-mobile-header,
-.dashboard-mobile-facts,
-.dashboard-mobile-kpis,
-.dashboard-mobile-graphs,
-.dashboard-mobile-summary {
-  margin-bottom: 1.2rem;
-  background: #fff;
-  border-radius: 1rem;
-  padding: 1rem;
-} 
+

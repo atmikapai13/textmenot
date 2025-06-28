@@ -1,0 +1,252 @@
+.dashboard-root {
+  position: relative;
+  min-height: 90vh;
+  min-width: 90vw;
+  background: #FFF5F7;
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+  box-sizing: border-box;
+  font-family: 'Lora', serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.dashboard-corner {
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  opacity: 1.0;
+  z-index: 2;
+  
+}
+
+.topleft { top: -40px; left: -50px; }
+.topright { top: -40px; right: -50px; }
+.bottomleft { bottom: -30px; left: -50px; }
+.bottomright { bottom: -30px; right: -50px; }
+
+.dashboard-center-rect {
+  background: #FFE8FB;
+  border-radius: 2rem;
+  padding: 1.5rem 1.5rem 1.5rem 1.5rem;
+  width: 83vw;
+  height: 75vh;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 1;
+} 
+
+.dashboard-header {
+  text-align: center;
+  margin-bottom: 1.2rem;
+  z-index: 2;
+}
+.dashboard-title {
+  font-family: 'DM Serif Text', serif;
+  color: #E33CC1;
+  font-size: 2.2rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-top: 2.5rem;
+  margin-bottom: 0.0rem;
+}
+
+.dashboard-dates {
+  color: #E33CC1;
+  font-size: 1.1rem;
+  font-style: italic;
+  margin-bottom: 1.2rem;
+  margin-top: 0.0rem;
+}
+
+.dashboard-facts {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: stretch;
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  margin-top: 0.0rem;
+  padding: 1rem 3rem;
+  margin-bottom: 2.2rem;
+  gap: 2.2rem;
+  z-index: 2;
+  position: relative;
+  
+}
+
+.dashboard-facts-title {
+  font-family: 'DM Serif Text', serif;
+  color: #682960;
+  font-size: 1.5rem;
+  font-style: italic;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 0.0rem;
+  align-items: center;
+}
+
+.dashboard-facts-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 1.5rem;
+  width: 100%;
+  margin-top: 0rem;
+}
+
+.dashboard-fact {
+  font-family: 'Lora', serif;
+  text-align: center;
+  font-size: 0.1rem;
+  color: #0E2102;
+  min-width: 110px;
+  margin-top: 0.0rem;
+}
+.fact-number {
+  font-family: 'Lora', serif;
+  font-size: 1.5rem;
+  color: #E33CC1;
+  font-weight: 700;
+  margin-top: 0.0rem;
+}
+
+.dashboard-main {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 2.2rem;
+  width: 100%;
+  max-width: 900px;
+  margin-bottom: 2.2rem;
+  z-index: 2;
+}
+
+.dashboard-kpi {
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  width: 100%;
+  padding: 1.2rem 1.5rem;
+  flex: 1;
+  margin-left: 2.5%;
+  margin-right: 0%;
+  box-sizing: border-box;
+}
+
+.dashboard-graphs {
+  background: #fff8fd;
+  border-radius: 1.2rem;
+  width: 100%;
+  padding: 0rem 1.5rem;
+  flex: 1;
+  margin-left: 0%;
+  margin-right: 2.5%;
+  
+  box-sizing: border-box;
+}
+
+.kpi-title, .graphs-title {
+  font-family: 'DM Serif Text', serif;
+  color: #682960;
+  font-size: 1.5rem;
+  font-weight: bold;
+  font-style: italic;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+.kpi-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+  align-items: center;
+}
+.kpi-table th, .kpi-table td {
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+  font-weight: 700;
+}
+
+.kpi-table td {
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+.kpi-table th {
+  font-family: 'DM Serif Text', serif;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #E33CC1;
+  padding: 0.3rem 0.5rem;
+  text-align: center;
+  color: #682960;
+}
+
+.kpi-table td {
+  font-family: 'Lora', serif;
+}
+
+.dashboard-graphs {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+.graphs-title {
+  text-align: center;
+  width: 100%;
+  margin-bottom: 0rem;
+}
+.graphs-bar {
+  width: 100%;
+  background: none;
+}
+.graph-label {
+  font-size: 1rem;
+  color: #682960;
+  font-style: italic;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  margin-top: 0rem;
+}
+
+.dashboard-summary {
+  margin-top: 0rem;
+  text-align: center;
+  color: #682960;
+  font-size: 1.1rem;
+  font-family: 'Lora', serif;
+  z-index: 2;
+  font-style: italic;
+}
+.dashboard-italic {
+  font-style: italic;
+  color: #E33CC1;
+}
+
+.dashboard-share {
+  margin-top: 0.5rem;
+  text-align: center;
+  color: #FF9AEF;
+  font-family: 'DM Serif Text', serif;
+  font-size: 1.1rem;
+  font-style: italic;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.flip-horizontal {
+  transform: scaleX(-1);
+}
