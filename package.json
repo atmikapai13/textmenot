@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "deploy": "vite build && gh-pages -d dist",
     "postbuild": "cp dist/index.html dist/404.html",
-    "GBD": "sh -c 'git add . && git commit -m \"$1\" && git push && npm run deploy' --"
+    "GBD": "sh -c 'git add . && git commit -m \"$1\" && git push && npm run build && npm run deploy' --"
   },
   "dependencies": {
     "react": "^19.1.0",
