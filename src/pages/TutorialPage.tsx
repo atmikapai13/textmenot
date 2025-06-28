@@ -42,6 +42,7 @@ export const TutorialPage: React.FC<TutorialPageProps> = () => {
   return (
     <div className="tutorial-root">
       <div className="tutorial-content">
+        <img src={`${import.meta.env.BASE_URL}rose2.png`} alt="rose" className="tutorial-rose"/>
         <h1 className="tutorial-heading">Upload chats from WhatsApp</h1>
         <div className="tutorial-steps">
           <em>1. Open WhatsApp on your phone<br /></em>

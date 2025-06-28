@@ -1,7 +1,10 @@
 @import './styles/design-system.css';
 
-body {
-  background: #FFF5F7;
+html, body {
+  background: #FFF5F7 !important;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 :root {

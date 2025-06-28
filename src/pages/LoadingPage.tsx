@@ -24,12 +24,18 @@ export const LoadingPage: React.FC = () => {
     (async () => {
       try {
         const msgs = await parseChatFile(file);
+        const participants = Array.from(new Set(msgs.map(m => m.sender)));
+        if (participants.length > 2) {
+          setError('Our analysis only supports one-on-one conversations.');
+          setTimeout(() => setShowError(true), 5000);
+          return;
+        }
         setMessages(msgs);
         setFacts(getFactsAndFigures(msgs));
         setKpis(getKPIs(msgs));
         setTimeout(() => setShowReady(true), 5000);
       } catch (err) {
-        setError('Incorrect File Format!');
+        setError('Only .txt and .zip files are accepted. We’re picky like that.');
         setTimeout(() => setShowError(true), 5000);
       }
     })();
@@ -61,7 +67,7 @@ export const LoadingPage: React.FC = () => {
           </h2>
       {error && showError ? (
         <div className="loading-next fade-in" style={{ color: '#E33CC1', fontStyle: 'italic', marginTop: '1.2rem' }}>
-          Incorrect File Format!<br />
+          {error}<br />
           <button className="landing-next" style={{ marginTop: '0rem' }} onClick={handleGoBack}>
             Go back
           </button>

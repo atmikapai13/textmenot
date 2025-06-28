@@ -4,6 +4,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } fro
 import { useLocation } from 'react-router-dom';
 import { getStackedBarData, formatResponseTime, fmtPct, fmtWords, fmtInt } from '../utils/whatsappParser';
 
+
 const COLORS = ['#E33CC1', '#FF9AEF'];
 
 // Unicode-safe base64 encode/decode

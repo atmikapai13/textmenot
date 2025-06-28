@@ -1,3 +1,11 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  align-items: center;
+  justify-content: center;
+}
+
 .landing-root {
   background: #FFF5F7;
   display: flex;
@@ -102,17 +110,26 @@
 @media (max-width: 600px) {
   .landing-root {
     padding: 0.5rem;
-  }
-  .landing-content {
     height: 100dvh;
     min-height: 100dvh;
+  }
+  .landing-content {
+    height: 100vh;
+    height: 100dvh;
+    min-height: 100vh;
+    min-height: 100dvh;
     padding: 1.2rem 0.2rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-sizing: border-box;
   }
   .landing-heading {
     font-size: 2rem;
   }
   .landing-body {
-    font-size: 1rem;
+    font-size: 0.8rem;
   }
   .landing-rose {
     width: 44px;
