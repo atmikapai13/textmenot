@@ -10,6 +10,18 @@ import { trackShare, trackDownload, trackRestart, trackCopyUrl, trackAnalysisCom
 
 interface DashboardProps {}
 
+// Compact response time formatter for mobile
+function formatResponseTimeCompact(ms: number): string {
+  const minutes = Math.floor(ms / (1000 * 60));
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days}d${hours % 24 > 0 ? (hours % 24) + 'h' : ''}`;
+  if (hours > 0) return `${hours}h${minutes % 60 > 0 ? (minutes % 60) + 'm' : ''}`;
+  if (minutes > 0) return `${minutes}m`;
+  return '<1m';
+}
+
 const DashboardMobile: React.FC<DashboardProps> = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -248,24 +260,24 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
         <div className="dashboard-fact-title" style={{fontWeight: '700'}}>Avg. Response Time</div>
           <div className="dashboard-fact-numbers-row" style={{ display: "flex", justifyContent: "space-between", gap: "20px" }}>
             <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
-              {kpis[userA]?.avgResponseTime !== undefined ? formatResponseTime(kpis[userA].avgResponseTime) : '-'}
+              {kpis[userA]?.avgResponseTime !== undefined ? formatResponseTimeCompact(kpis[userA].avgResponseTime) : '-'}
             </span>
             <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
-              {kpis[userB]?.avgResponseTime !== undefined ? formatResponseTime(kpis[userB].avgResponseTime) : '-'}
+              {kpis[userB]?.avgResponseTime !== undefined ? formatResponseTimeCompact(kpis[userB].avgResponseTime) : '-'}
             </span>
           </div>
           
         </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title" style={{display: "flex", justifyContent: "center", gap: "50px", width: "auto", margin: "0 auto", fontWeight: '700'}}>Avg. Message Length (words)</div>
+      <div className="dashboard-fact-title" style={{display: "flex", justifyContent: "center", gap: "50px", width: "auto", margin: "0 auto", fontWeight: '700'}}>Avg. Message Length</div>
       
       <div className="dashboard-fact-numbers-row">
-        <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
-          {kpis[userA]?.avgMessageLength !== undefined ? kpis[userA].avgMessageLength.toFixed(1) : '-'}
-        </span>
-        <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
-          {kpis[userB]?.avgMessageLength !== undefined ? kpis[userB].avgMessageLength.toFixed(1) : '-'}
-        </span>
+      <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+        {kpis[userA]?.avgMessageLength !== undefined ? `${kpis[userA].avgMessageLength.toFixed(1)} words` : '-'}
+      </span>
+      <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
+        {kpis[userB]?.avgMessageLength !== undefined ? `${kpis[userB].avgMessageLength.toFixed(1)} words` : '-'}
+      </span>
       </div>
       
     </div>
