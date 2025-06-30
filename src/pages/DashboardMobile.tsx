@@ -12,6 +12,16 @@ interface DashboardProps {}
 
 const DashboardMobile: React.FC<DashboardProps> = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+
+  // Redirect to /tutorial if required data is missing
+  useEffect(() => {
+    const state = location.state as any;
+    if (!state || !state.facts || !state.kpis) {
+      navigate('/tutorial', { replace: true });
+    }
+  }, [location, navigate]);
+
   const COLORS = ['#E33CC1', '#FF9AEF'];
   const facts = (location.state && (location.state as any).facts) || {};
   const kpis = (location.state && (location.state as any).kpis) || {};
@@ -24,7 +34,6 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
     (location.state && (location.state as any).barData) || []
   );
    // Share functionality
-   const navigate = useNavigate();
    const [showCopied, setShowCopied] = useState(false);
 
    const handleRestart = () => {
