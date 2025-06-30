@@ -29,17 +29,90 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
    const handleRestart = () => {
        navigate('/tutorial');
    };
-   const handleShare = async () => {
-    if (dashboardImageRef.current) {
-      const canvas = await html2canvas(dashboardImageRef.current, { useCORS: true });
-      const image = canvas.toDataURL('image/png');
-      // Download the image
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = 'dashboard.png';
-      link.click();
-    }
+
+   // Helper function to download image
+   const downloadImage = (canvas: HTMLCanvasElement) => {
+     const link = document.createElement('a');
+     link.download = 'text-results.png';
+     link.href = canvas.toDataURL();
+     link.click();
    };
+
+   const handleShareImage = async () => {
+    try {
+      // Use the ref instead of getElementById
+      if (!dashboardImageRef.current) {
+        console.error('Dashboard element not found');
+        return;
+      }
+
+      const canvas = await html2canvas(dashboardImageRef.current, { useCORS: true });
+      
+      // Convert canvas to blob
+      canvas.toBlob(async (blob) => {
+        if (!blob) {
+          console.error('Failed to create blob');
+          downloadImage(canvas);
+          return;
+        }
+
+        // Create a File object from the blob
+        const file = new File([blob], 'text-results.png', { 
+          type: 'image/png' 
+        });
+        
+        // Check if sharing files is supported
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              files: [file],
+              title: "He'll Text Me. He'll Text Me Not.",
+              text: 'Check out my results!',
+            });
+          } catch (err: any) {
+            if (err.name !== 'AbortError') {
+              // User didn't cancel - there was an actual error
+              console.error('Error sharing:', err);
+              // Fallback to download
+              downloadImage(canvas);
+            }
+          }
+        } else {
+          // Fallback: download the image
+          downloadImage(canvas);
+        }
+      }, 'image/png');
+      
+    } catch (error) {
+      console.error('Error generating image:', error);
+      // Final fallback - try to generate and download
+      if (dashboardImageRef.current) {
+        try {
+          const canvas = await html2canvas(dashboardImageRef.current, { useCORS: true });
+          downloadImage(canvas);
+        } catch (fallbackError) {
+          console.error('Fallback download also failed:', fallbackError);
+        }
+      }
+    }
+  };
+
+  const handleShareOrDownload = async () => {
+    // Try to share first
+    if (navigator.canShare && typeof navigator.canShare === 'function') {
+      await handleShareImage();
+    } else {
+      // Fallback to download
+      if (dashboardImageRef.current) {
+        try {
+          const canvas = await html2canvas(dashboardImageRef.current, { useCORS: true });
+          downloadImage(canvas);
+        } catch (error) {
+          console.error('Error downloading image:', error);
+        }
+      }
+    }
+  };
    const handleCopyUrl = () => {
     navigator.clipboard.writeText('https://atmikapai13.github.io/ghosting_validator/');
     setShowCopied(true);
@@ -249,7 +322,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
         <div className="dashboard-summary">
           We'll let you derive your own conclusions. Happy analyzing!<br />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
-            <span className="dashboard-share" onClick={handleShare} style={{ cursor: 'pointer' }}>
+            <span className="dashboard-share" onClick={handleShareOrDownload} style={{ cursor: 'pointer' }}>
               Share these results 🌹
             </span>
             
