@@ -25,6 +25,30 @@ function PageTracker() {
   return null;
 }
 
+// Handles redirect from 404.html and forces landing page on first visit
+function RedirectHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const redirected = params.get('redirected');
+    const path = params.get('path');
+    if (redirected && path) {
+      navigate(path, { replace: true });
+      return;
+    }
+    // Force landing page on first visit
+    if (location.pathname !== '/' && !sessionStorage.getItem('visited')) {
+      navigate('/', { replace: true });
+    } else {
+      sessionStorage.setItem('visited', 'true');
+    }
+  }, [navigate, location]);
+
+  return null;
+}
+
 function LandingPageWithNav() {
   const navigate = useNavigate()
   return <LandingPage onNext={() => navigate('/tutorial')} />
@@ -38,6 +62,7 @@ function TutorialPageWithNav() {
 function App() {
   return (
     <Router basename="/ghosting_validator">
+      <RedirectHandler />
       <PageTracker />
       <Routes>
         <Route path="/" element={<LandingPageWithNav />} />
