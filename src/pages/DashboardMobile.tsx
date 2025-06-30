@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './DashboardMobile.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { getStackedBarData, formatResponseTime } from '../utils/whatsappParser';
+import { getStackedBarData } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { trackShare, trackDownload, trackRestart, trackCopyUrl, trackAnalysisComplete } from '../utils/analytics';
