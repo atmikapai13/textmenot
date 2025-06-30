@@ -5,6 +5,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } fro
 import { getStackedBarData, formatResponseTime } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
+import { trackShare, trackDownload, trackRestart, trackCopyUrl, trackAnalysisComplete } from '../utils/analytics';
 
 
 interface DashboardProps {}
@@ -27,11 +28,13 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
    const [showCopied, setShowCopied] = useState(false);
 
    const handleRestart = () => {
+       trackRestart();
        navigate('/tutorial');
    };
 
    // Helper function to download image
    const downloadImage = (canvas: HTMLCanvasElement) => {
+     trackDownload();
      const link = document.createElement('a');
      link.download = 'text-results.png';
      link.href = canvas.toDataURL();
@@ -69,6 +72,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
               title: "He'll Text Me. He'll Text Me Not.",
               text: 'Check out my results!',
             });
+            trackShare('native_share');
           } catch (err: any) {
             if (err.name !== 'AbortError') {
               // User didn't cancel - there was an actual error
@@ -114,6 +118,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
     }
   };
    const handleCopyUrl = () => {
+    trackCopyUrl();
     navigator.clipboard.writeText('https://atmikapai13.github.io/ghosting_validator/');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 1500);
@@ -127,6 +132,13 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
       setBarData(getStackedBarData(messages, factsInit));
     }
   }, [barData.length, location.state]);
+
+  // Track when dashboard is loaded (analysis complete)
+  useEffect(() => {
+    if (location.state && (location.state as any).facts) {
+      trackAnalysisComplete();
+    }
+  }, [location.state]);
   
   // Custom Tooltip for BarChart
   const CustomTooltip = ({ active, payload, label }: any) => {
