@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy": "gh-pages -d dist",
-    "postbuild": "cp dist/index.html dist/404.html",
+    "postbuild": "cp dist/index.html dist/404.html && cp CNAME dist/CNAME",
     "GBD": "sh -c 'git add . && git commit -m \"$1\" && git push && npm run build && npm run deploy' --"
   },
   "dependencies": {
