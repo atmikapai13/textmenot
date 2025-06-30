@@ -1,12 +1,14 @@
 // Google Analytics Configuration
+// Use Vite's import.meta.env to access environment variables
+
 declare global {
   interface Window {
     gtag: (...args: any[]) => void;
   }
 }
 
-// Replace 'G-XXXXXXXXXX' with your actual Google Analytics Measurement ID
-export const GA_TRACKING_ID = 'G-RHQ3WC5D26';
+// Read from Vite environment variable
+export const GA_TRACKING_ID = import.meta.env.VITE_GA_TRACKING_ID;
 
 // Initialize Google Analytics
 export const initGA = () => {

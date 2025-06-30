@@ -1,5 +1,5 @@
 import './App.css'
-import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom'
 import { LandingPage } from './pages/LandingPage.tsx'
 import { TutorialPage } from './pages/TutorialPage.tsx'
 import { LoadingPage } from './pages/LoadingPage.tsx'
@@ -70,6 +70,8 @@ function App() {
         <Route path="/loading" element={<LoadingPage />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/chatparser" element={<ChatParser />} />
+        {/* CATCH-ALL ROUTE: Redirect unknown paths to home */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   )

@@ -25,3 +25,4 @@ dist-ssr
 
 # Analytics documentation
 analytics.txt
+.env
