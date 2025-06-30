@@ -248,7 +248,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           
         </div>
       <div className="dashboard-fact" style={{ marginTop: 0 }}>
-      <div className="dashboard-fact-title" style={{display: "flex", justifyContent: "center", gap: "50px", width: "auto", margin: "0 auto"}}>Avg. Message Length (words)</div>
+      <div className="dashboard-fact-title" style={{display: "flex", justifyContent: "center", gap: "50px", width: "auto", margin: "0 auto", fontWeight: '700'}}>Avg. Message Length (words)</div>
       
       <div className="dashboard-fact-numbers-row">
         <span className="fact-number" style={{ marginTop: 0, marginBottom: 0 }}>
