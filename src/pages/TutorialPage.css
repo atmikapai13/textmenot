@@ -116,7 +116,8 @@
 
 .tutorial-note {
   text-align: center;
-  color: #FF9AEF;
+  color: #682960;
+  font-weight: 700;
   font-size: 1rem;
   font-family: 'Lora', serif;
   font-style: italic;

@@ -75,7 +75,8 @@ export const TutorialPage: React.FC<TutorialPageProps> = () => {
           <button className="tutorial-submit" type="submit">Submit</button>
         </form>
         <div className="tutorial-note">
-          Note: Only you and social media companies own your data.<br/>
+        <span style={{ color: '#E33CC1'}}>Note: </span> 
+          Only you and social media companies own your data.<br/>
           We don't store it! We don't sell it!
         </div>
       </div>

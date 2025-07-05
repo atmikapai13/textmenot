@@ -67,24 +67,28 @@ html, body, #root {
 
 .landing-next {
   margin-top: 0.5rem;
-  background: #FFF5F7;
-  border: none;
-  color: #FF9AEF;
+  background: #682960;
+  border: #682960;
+  padding-top: 0.3em;
+  padding-bottom: 0.3em;
+  border-width: 1px;
+  border-radius: 10px;
+  border-style: solid;
+  color: #FFFFFF;
   font-family: 'DM Serif Text', serif;
   font-size: 1.1rem;
   font-weight: bold;
   cursor: pointer;
   transition: color 0.2s;
-  min-height: 2.2em;
+  min-height: 2.0em;
   min-width: 4em;
   display: block;
   margin-left: auto;
   margin-right: auto;
-  font-style: italic;
 }
 .landing-next:hover {
-  color: #E33CC1;
-  text-decoration: underline;
+  font-style: italic;
+  background: #E33CC1;
 }
 
 .landing-next.invisible {
@@ -96,6 +100,12 @@ html, body, #root {
   visibility: visible;
   opacity: 1;
   pointer-events: auto;
+}
+
+.landing-next:focus {
+  outline: none;
+  /* Optionally, you can add a custom outline for accessibility: */
+  /* outline: 2px solid #E33CC1; */
 }
 
 .fade-in {

@@ -10,7 +10,15 @@ export interface WhatsAppMessage {
 }
 
 export class WhatsAppParser {
-  private static readonly MESSAGE_REGEX = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2}\s+(?:AM|PM))\]\s+(.+?):\s+(.+)$/;
+  // Regex for both date orders, 2/4 digit year, 24h/12h time, always / separator
+  private static readonly MESSAGE_REGEX = /^\[(\d{1,2})\/(\d{1,2})\/(\d{2,4}),?\s+(\d{1,2}):(\d{2}):(\d{2})(?:\s*(AM|PM))?\]\s+(.+?):\s+([\s\S]+)$/;
+  private static readonly SYSTEM_MESSAGE_REGEX = /end-to-end encrypted|Messages and calls are end-to-end encrypted/i;
+  private static readonly MESSAGE_REGEX_24H_US = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2})\]\s+(.+?):\s+(.+)$/;
+  private static readonly MESSAGE_REGEX_12H_US = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2}\s+(?:AM|PM))\]\s+(.+?):\s+(.+)$/;
+  private static readonly MESSAGE_REGEX_24H_EU = /^\[(\d{1,2}-(\d{1,2})-(\d{2,4})),?\s+(\d{1,2}:\d{2}:\d{2})\]\s+(.+?):\s+(.+)$/;
+  private static readonly MESSAGE_REGEX_12H_EU = /^\[(\d{1,2}-(\d{1,2})-(\d{2,4})),?\s+(\d{1,2}:\d{2}:\d{2}\s+(?:AM|PM))\]\s+(.+?):\s+(.+)$/;
+  private static readonly MESSAGE_REGEX_24H_EU_SLASH = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2})\]\s+(.+?):\s+(.+)$/;
+  private static readonly MESSAGE_REGEX_12H_EU_SLASH = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2}\s+(?:AM|PM))\]\s+(.+?):\s+(.+)$/;
   private static readonly MEDIA_PATTERNS = {
     image: /image omitted/i,
     sticker: /sticker omitted/i,
@@ -29,20 +37,50 @@ export class WhatsAppParser {
   static parseMessage(line: string): WhatsAppMessage | null {
     // Remove invisible Unicode characters and leading/trailing whitespace
     const cleanLine = line.replace(/[\u200e\u200f\u202a-\u202e]/g, '').trim();
-    const match = cleanLine.match(this.MESSAGE_REGEX);
+    
+    // Try all regexes and pick the one that matches and deduce date order
+    let match, dateOrder: 'US' | 'EU' = 'US', is24Hour = true;
+    // Try US-style first
+    match = cleanLine.match(this.MESSAGE_REGEX_24H_US);
+    if (match) { is24Hour = true; dateOrder = 'US'; }
+    else {
+      match = cleanLine.match(this.MESSAGE_REGEX_12H_US);
+      if (match) { is24Hour = false; dateOrder = 'US'; }
+    }
+    // Try EU-style (with dash or slash)
+    if (!match) {
+      match = cleanLine.match(this.MESSAGE_REGEX_24H_EU);
+      if (match) { is24Hour = true; dateOrder = 'EU'; }
+    }
+    if (!match) {
+      match = cleanLine.match(this.MESSAGE_REGEX_12H_EU);
+      if (match) { is24Hour = false; dateOrder = 'EU'; }
+    }
+    if (!match) {
+      match = cleanLine.match(this.MESSAGE_REGEX_24H_EU_SLASH);
+      if (match) { is24Hour = true; dateOrder = 'EU'; }
+    }
+    if (!match) {
+      match = cleanLine.match(this.MESSAGE_REGEX_12H_EU_SLASH);
+      if (match) { is24Hour = false; dateOrder = 'EU'; }
+    }
     if (!match) return null;
 
-    const [, dateStr, timeStr, sender, message] = match;
-    
+    // For all regexes, the first three groups are date, time, sender, message
+    let [, dateStr, timeStr, sender, message] = match;
+    // For dash-based EU regex, adjust indices
+    if (match.length > 5) {
+      dateStr = `${match[1]}`;
+      timeStr = match[4];
+      sender = match[5];
+      message = match[6];
+    }
     // Ensure all required parts are present
     if (!dateStr || !timeStr || !sender || !message) return null;
-    
     // Parse timestamp
-    const timestamp = this.parseTimestamp(dateStr, timeStr);
-    
+    const timestamp = this.parseTimestamp(dateStr, timeStr, is24Hour, dateOrder);
     // Check if it's media
     const mediaInfo = this.detectMedia(message);
-    
     return {
       timestamp,
       sender: sender.trim(),
@@ -56,55 +94,134 @@ export class WhatsAppParser {
    * Parse multiple lines from a WhatsApp export
    */
   static parseChat(text: string): WhatsAppMessage[] {
-    const lines = text.split('\n').filter(line => line.trim());
+    const lines = text.split('\n');
     const messages: WhatsAppMessage[] = [];
+    let currentMessage: WhatsAppMessage | null = null;
+    let currentMessageText: string[] = [];
+    let dateOrder: 'US' | 'EU' | null = null;
 
     for (const line of lines) {
-      const message = this.parseMessage(line);
-      if (message) {
-        messages.push(message);
+      const cleanLine = line.trim();
+      if (!cleanLine) continue;
+      // Ignore system messages
+      if (this.SYSTEM_MESSAGE_REGEX.test(cleanLine)) continue;
+      // Try to match message
+      const match = cleanLine.match(this.MESSAGE_REGEX);
+      if (match) {
+        // Auto-detect date order on first valid message
+        if (!dateOrder) {
+          const first = parseInt(match[1] || '0', 10);
+          // If first > 12, it's day-first (EU), else month-first (US)
+          dateOrder = first > 12 ? 'EU' : 'US';
+        }
+        // Save previous message if exists
+        if (currentMessage && currentMessageText.length > 0) {
+          currentMessage.message = currentMessageText.join('\n').trim();
+          messages.push(currentMessage);
+        }
+        // Parse date/time
+        const d1 = match[1] || '1', d2 = match[2] || '1', year = match[3] || '2000';
+        const hour = match[4] || '0', minute = match[5] || '0', second = match[6] || '0';
+        const ampm = match[7];
+        const sender = match[8] || '';
+        const messageText = match[9] || '';
+        let month, day;
+        if (dateOrder === 'EU') {
+          day = d1; month = d2;
+        } else {
+          month = d1; day = d2;
+        }
+        const fullYear = year.length === 2 ? `20${year}` : year;
+        let h = parseInt(hour, 10);
+        if (ampm) {
+          if (ampm === 'PM' && h !== 12) h += 12;
+          if (ampm === 'AM' && h === 12) h = 0;
+        }
+        const timestamp = new Date(
+          parseInt(fullYear, 10),
+          parseInt(month, 10) - 1,
+          parseInt(day, 10),
+          h,
+          parseInt(minute, 10),
+          parseInt(second, 10)
+        );
+        const mediaInfo = this.detectMedia(messageText);
+        currentMessage = {
+          timestamp,
+          sender: sender.trim(),
+          message: messageText.trim(),
+          isMedia: mediaInfo.isMedia,
+          mediaType: mediaInfo.mediaType,
+        };
+        currentMessageText = [messageText.trim()];
+      } else if (currentMessage) {
+        // This is a continuation of the current message
+        currentMessageText.push(cleanLine);
       }
     }
-
+    // Don't forget the last message
+    if (currentMessage && currentMessageText.length > 0) {
+      currentMessage.message = currentMessageText.join('\n').trim();
+      messages.push(currentMessage);
+    }
     return messages;
   }
 
   /**
    * Parse timestamp from date and time strings
    */
-  private static parseTimestamp(dateStr: string, timeStr: string): Date {
-    // Handle different date formats (MM/DD/YY or MM/DD/YYYY)
-    const [month, day, year] = dateStr.split('/');
+  private static parseTimestamp(dateStr: string, timeStr: string, is24Hour: boolean = true, dateOrder: 'US' | 'EU' = 'US'): Date {
+    // Handle different date formats (MM/DD/YY or DD/MM/YY or YYYY)
+    let month: string = '', day: string = '', year: string = '';
+    if (dateOrder === 'US') {
+      const parts = dateStr.split(/[\/\-]/);
+      month = parts[0] || '';
+      day = parts[1] || '';
+      year = parts[2] || '';
+    } else {
+      const parts = dateStr.split(/[\/\-]/);
+      day = parts[0] || '';
+      month = parts[1] || '';
+      year = parts[2] || '';
+    }
     if (!month || !day || !year) {
       throw new Error(`Invalid date format: ${dateStr}`);
     }
-    
     const fullYear = year.length === 2 ? `20${year}` : year;
-    
-    // Parse time (e.g., "6:27:05 PM")
-    const timeMatch = timeStr.match(/(\d{1,2}):(\d{2}):(\d{2})\s+(AM|PM)/);
-    if (!timeMatch) {
-      throw new Error(`Invalid time format: ${timeStr}`);
+    let hour = 0, minute = 0, second = 0;
+    if (is24Hour) {
+      const timeMatch = timeStr.match(/(\d{1,2}):(\d{2}):(\d{2})/);
+      if (!timeMatch) {
+        throw new Error(`Invalid time format: ${timeStr}`);
+      }
+      const hours = timeMatch[1] || '0';
+      const minutes = timeMatch[2] || '0';
+      const seconds = timeMatch[3] || '0';
+      hour = parseInt(hours);
+      minute = parseInt(minutes);
+      second = parseInt(seconds);
+    } else {
+      const timeMatch = timeStr.match(/(\d{1,2}):(\d{2}):(\d{2})\s+(AM|PM)/);
+      if (!timeMatch) {
+        throw new Error(`Invalid time format: ${timeStr}`);
+      }
+      const hours = timeMatch[1] || '0';
+      const minutes = timeMatch[2] || '0';
+      const seconds = timeMatch[3] || '0';
+      const period = timeMatch[4] || 'AM';
+      hour = parseInt(hours);
+      minute = parseInt(minutes);
+      second = parseInt(seconds);
+      if (period === 'PM' && hour !== 12) hour += 12;
+      if (period === 'AM' && hour === 12) hour = 0;
     }
-
-    const [, hours, minutes, seconds, period] = timeMatch;
-    if (!hours || !minutes || !seconds || !period) {
-      throw new Error(`Invalid time format: ${timeStr}`);
-    }
-    
-    let hour = parseInt(hours);
-    
-    // Convert to 24-hour format
-    if (period === 'PM' && hour !== 12) hour += 12;
-    if (period === 'AM' && hour === 12) hour = 0;
-
     return new Date(
       parseInt(fullYear),
       parseInt(month) - 1, // Month is 0-indexed
       parseInt(day),
       hour,
-      parseInt(minutes),
-      parseInt(seconds)
+      minute,
+      second
     );
   }
 
@@ -539,10 +656,11 @@ export function getStackedBarData(messages: WhatsAppMessage[], facts: any) {
   const binSize = msDiff / totalBins;
 
   // Generate period boundaries and labels
-  let periods: { start: Date; end: Date; label: string }[] = [];
+  let periods: { start: Date; end: Date; label: string; daysElapsed: number }[] = [];
   for (let i = 0; i < totalBins; i++) {
     const start = new Date(firstDate.getTime() + i * binSize);
     const end = i === totalBins - 1 ? new Date(lastDate.getTime() + 1) : new Date(firstDate.getTime() + (i + 1) * binSize);
+    const daysElapsed = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
     // Improved label: if same year, 'May – July 2024', else 'Dec 2024 – Jan 2025'
     const sameYear = start.getFullYear() === end.getFullYear();
     let label = '';
@@ -555,7 +673,7 @@ export function getStackedBarData(messages: WhatsAppMessage[], facts: any) {
       const endMonthYear = end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
       label = `${startMonthYear} – ${endMonthYear}`;
     }
-    periods.push({ start, end, label });
+    periods.push({ start, end, label, daysElapsed });
   }
   if (!Array.isArray(periods) || periods.length === 0) return [];
 
@@ -570,11 +688,33 @@ export function getStackedBarData(messages: WhatsAppMessage[], facts: any) {
     const total = countA + countB;
     return {
       periodLabel: period.label,
+      startDate: start,
+      endDate: end,
+      binDaysElapsed: period.daysElapsed,
       [userA]: total > 0 ? Math.round((countA / total) * 100) : 0,
       [userB]: total > 0 ? Math.round((countB / total) * 100) : 0,
     };
   });
   return data;
+}
+
+/**
+ * Formats a bin's date range for the tooltip, using the new logic.
+ * If days <= 150, show 'Mon D YY – Mon D YY', else show 'Mon – Mon YYYY'.
+ */
+export function formatBinDateRange(start: Date, end: Date, daysElapsed: number): string {
+  if (!start || !end) return '-';
+  if (daysElapsed <= 150) {
+    // e.g. 'Jul 4 2025 – Jul 6 2025'
+    const startStr = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const endStr = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    return `${startStr} – ${endStr}`;
+  } else {
+    // e.g. 'Jun – Jul 2025'
+    const startStr = start.toLocaleDateString('en-US', { month: 'short' });
+    const endStr = end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return `${startStr} – ${endStr}`;
+  }
 }
 
 // Helper to format response time in ms to 'X hr Y min'
@@ -623,5 +763,24 @@ export async function parseChatFile(file: File): Promise<WhatsAppMessage[]> {
     return WhatsAppParser.parseChat(text);
   } else {
     throw new Error('Unsupported file type');
+  }
+}
+
+/**
+ * Returns a legend date range string for the graph, based on the total days elapsed.
+ * If days <= 150, show 'Mon D – Mon D', else show 'Mon – Mon YYYY'.
+ */
+export function getGraphLegendDateRange(firstDate: Date | null, lastDate: Date | null, daysElapsed: number): string {
+  if (!firstDate || !lastDate) return '-';
+  if (daysElapsed <= 150) {
+    // e.g. 'Jul 4 – Jul 6'
+    const start = firstDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    const end = lastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    return `${start} – ${end}`;
+  } else {
+    // e.g. 'Jun – Jul 2025'
+    const start = firstDate.toLocaleDateString('en-US', { month: 'short' });
+    const end = lastDate.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
+    return `${start} – ${end}`;
   }
 } 

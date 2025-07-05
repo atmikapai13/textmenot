@@ -2,7 +2,7 @@ import { useState, useEffect , useRef} from 'react';
 import './DashboardDesktop.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { useLocation } from 'react-router-dom';
-import { getStackedBarData, formatResponseTime, fmtPct, fmtWords, fmtInt } from '../utils/whatsappParser';
+import { getStackedBarData, formatResponseTime, fmtPct, fmtWords, fmtInt, formatBinDateRange } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 
@@ -34,6 +34,7 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
   const userA = participants[0] || 'User A';
   const userB = participants[1] || 'User B';
   const dateRange = facts.dateRange || '-';
+
   
   // Share functionality
   const navigate = useNavigate();
@@ -60,11 +61,13 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
    };
 
   // Custom Tooltip for BarChart
-  const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+  const CustomTooltip = ({ active, payload }: any) => {
+    if (active && payload && payload.length && payload[0].payload) {
+      const bin = payload[0].payload;
+      const dateRange = formatBinDateRange(bin.startDate, bin.endDate, bin.binDaysElapsed);
       return (
         <div className="custom-tooltip" style={{ background: '#fff8fd', border: '1px solid #E33CC1', borderRadius: '8px', padding: '0.7em 1em', color: '#682960' }}>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>{dateRange}</div>
           <div><span style={{ color: COLORS[0], fontWeight: 700 }}>{userA}:</span> {payload[0].value}%</div>
           <div><span style={{ color: COLORS[1], fontWeight: 700 }}>{userB}:</span> {payload[1].value}%</div>
         </div>
@@ -137,7 +140,7 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
           <div className="dashboard-graphs">
             <div className="graphs-title" style={{ marginTop: '0.6rem' }}>Graphs
               <div className="graph-label" style={{ marginBottom: '0.0rem', marginTop: '0.0rem', fontStyle: 'normal', fontFamily: 'DM Serif Text', color: '#0E2102', fontWeight: 100 }}> 
-                Message Equity Index </div>
+                Message Equity Index</div>
             </div>
       
             <div className="graphs-bar">

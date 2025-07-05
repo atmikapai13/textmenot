@@ -18,7 +18,7 @@ export const LoadingPage: React.FC = () => {
   useEffect(() => {
     if (!file) {
       setError('No file provided!');
-      setTimeout(() => setShowError(true), 5000);
+      setTimeout(() => setShowError(true), 3000);
       return;
     }
     (async () => {
@@ -27,16 +27,16 @@ export const LoadingPage: React.FC = () => {
         const participants = Array.from(new Set(msgs.map(m => m.sender)));
         if (participants.length > 2) {
           setError('Our analysis only supports one-on-one conversations.');
-          setTimeout(() => setShowError(true), 5000);
+          setTimeout(() => setShowError(true), 3000);
           return;
         }
         setMessages(msgs);
         setFacts(getFactsAndFigures(msgs));
         setKpis(getKPIs(msgs));
-        setTimeout(() => setShowReady(true), 5000);
+        setTimeout(() => setShowReady(true), 3000);
       } catch (err) {
         setError('Only .txt and .zip files are accepted. We’re picky like that.');
-        setTimeout(() => setShowError(true), 5000);
+        setTimeout(() => setShowError(true), 3000);
       }
     })();
     const dotInterval = setInterval(() => {

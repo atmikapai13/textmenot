@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './DashboardMobile.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { getStackedBarData } from '../utils/whatsappParser';
+import { getStackedBarData, getGraphLegendDateRange, formatBinDateRange } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { trackShare, trackDownload, trackRestart, trackCopyUrl, trackAnalysisComplete } from '../utils/analytics';
@@ -41,6 +41,11 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   const userA = participants[0] || 'User A';
   const userB = participants[1] || 'User B';
   const dateRange = facts.dateRange || '-';
+  let daysElapsed = 0;
+  if (typeof facts.daysAndHoursSpanned === 'string' && facts.daysAndHoursSpanned.includes('days')) {
+    daysElapsed = parseInt(facts.daysAndHoursSpanned.split(' ')[0], 10) || 0;
+  }
+  const graphLegend = getGraphLegendDateRange(facts.firstDate, facts.lastDate, daysElapsed);
   const dashboardImageRef = useRef<HTMLDivElement>(null);
   const [barData, setBarData] = useState<any[]>(
     (location.state && (location.state as any).barData) || []
@@ -163,10 +168,12 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   
   // Custom Tooltip for BarChart
   const CustomTooltip = ({ active, payload, label }: any) => {
-    if (active && payload && payload.length) {
+    if (active && payload && payload.length && payload[0].payload) {
+      const bin = payload[0].payload;
+      const dateRange = formatBinDateRange(bin.startDate, bin.endDate, bin.binDaysElapsed);
       return (
         <div className="custom-tooltip" style={{ background: '#fff8fd', border: '1px solid #E33CC1', borderRadius: '8px', padding: '0.7em 1em', color: '#682960' }}>
-          <div style={{ fontWeight: 700, marginBottom: 4 }}>{label}</div>
+          <div style={{ fontWeight: 700, marginBottom: 4 }}>{dateRange}</div>
           <div><span style={{ color: COLORS[0], fontWeight: 700 }}>{userA}:</span> {payload[0].value}%</div>
           <div><span style={{ color: COLORS[1], fontWeight: 700 }}>{userB}:</span> {payload[1].value}%</div>
         </div>
