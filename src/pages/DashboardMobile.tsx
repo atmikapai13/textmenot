@@ -2,7 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import './DashboardMobile.css';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Legend } from 'recharts';
-import { getStackedBarData, getGraphLegendDateRange, formatBinDateRange } from '../utils/whatsappParser';
+import { getStackedBarData, formatBinDateRange } from '../utils/whatsappParser';
 import { useNavigate } from 'react-router-dom';
 import html2canvas from 'html2canvas';
 import { trackShare, trackDownload, trackRestart, trackCopyUrl, trackAnalysisComplete } from '../utils/analytics';
@@ -41,11 +41,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   const userA = participants[0] || 'User A';
   const userB = participants[1] || 'User B';
   const dateRange = facts.dateRange || '-';
-  let daysElapsed = 0;
-  if (typeof facts.daysAndHoursSpanned === 'string' && facts.daysAndHoursSpanned.includes('days')) {
-    daysElapsed = parseInt(facts.daysAndHoursSpanned.split(' ')[0], 10) || 0;
-  }
-  const graphLegend = getGraphLegendDateRange(facts.firstDate, facts.lastDate, daysElapsed);
+  
   const dashboardImageRef = useRef<HTMLDivElement>(null);
   const [barData, setBarData] = useState<any[]>(
     (location.state && (location.state as any).barData) || []
@@ -167,7 +163,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   }, [location.state]);
   
   // Custom Tooltip for BarChart
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length && payload[0].payload) {
       const bin = payload[0].payload;
       const dateRange = formatBinDateRange(bin.startDate, bin.endDate, bin.binDaysElapsed);
