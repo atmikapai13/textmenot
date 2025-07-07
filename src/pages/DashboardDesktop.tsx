@@ -20,6 +20,8 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
   const [barData, setBarData] = useState<any[]>(
     (location.state && (location.state as any).barData) || []
   );
+  // Use 'any' to avoid linter error; can be typed more strictly if needed
+  const [drilldown, setDrilldown] = useState<any>(null);
 
   // If barData is empty but messages+facts are available, recalculate barData
   useEffect(() => {
@@ -76,19 +78,97 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
     return null;
   };
 
-  // Custom XAxis tick for line break after dash
+  // Custom XAxis tick: always line break after dash
   const CustomXAxisTick = (props: any) => {
     const { x, y, payload } = props;
-    const parts = payload.value.split(/ – | - /);
+    // Label is always 'MMM D, YYYY – MMM D, YYYY'
+    const parts = payload.value.split(' – ');
+    if (parts.length !== 2) {
+      // fallback
+      return (
+        <g transform={`translate(${x},${y})`}>
+          <text
+            textAnchor="end"
+            fontSize="0.7rem"
+            fill="#682960"
+            transform="rotate(-45)"
+            dy={0}
+            dx={-2}
+          >
+            {payload.value}
+          </text>
+        </g>
+      );
+    }
+    // Parse years
+    const startDate = new Date(parts[0]);
+    const endDate = new Date(parts[1]);
+    let firstLine = '';
+    let secondLine = '';
+    if (startDate.getFullYear() === endDate.getFullYear()) {
+      // Same year: 'MMM D –\nMMM D, YYYY'
+      const startFmt = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const endFmt = endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+      const year = startDate.getFullYear();
+      firstLine = `${startFmt} –`;
+      secondLine = `${endFmt} ${year}`;
+    } else {
+      // Different years: 'MMM D, YYYY –\nMMM D, YYYY'
+      firstLine = `${parts[0]} –`;
+      secondLine = parts[1];
+    }
     return (
       <g transform={`translate(${x},${y})`}>
-        <text textAnchor="middle" fontSize="0.7rem" fill="#682960" dy={10}>
-          <tspan x="0" dy="10">{parts[0]} –</tspan>
-          <tspan x="0" dy="12">{parts[1]}</tspan>
+        <text
+          textAnchor="end"
+          fontSize="0.7rem"
+          fill="#682960"
+          transform="rotate(-45)"
+          dy={0}
+          dx={-2}
+        >
+          {firstLine}
+          <tspan x="0" dy="12">{secondLine}</tspan>
         </text>
       </g>
     );
   };
+
+  // Handler for bar click (Level 1 -> Level 2)
+  const handleBarClick = (data: any) => {
+    if (!data || !data.startDate || !data.endDate) return;
+    // Filter messages for the selected period
+    const messages = (location.state as any).messages;
+    const factsInit = (location.state as any).facts;
+    if (!messages || !Array.isArray(messages)) {
+      console.error('No messages found or messages is not an array');
+      return;
+    }
+    // Defensive: handle both timestamp_ms (number) and timestamp (Date or string)
+    const filtered = messages.filter((m: any) => {
+      let t: Date;
+      if (m.timestamp_ms) {
+        t = new Date(m.timestamp_ms);
+      } else if (m.timestamp) {
+        t = new Date(m.timestamp);
+      } else {
+        return false;
+      }
+      return t >= new Date(data.startDate) && t < new Date(data.endDate);
+    });
+    console.log('Filtered messages for drilldown:', filtered);
+    // Re-bin into 6 bins for this period
+    const barData2 = getStackedBarData(filtered, factsInit);
+    console.log('Drilldown bar data:', barData2);
+    if (!barData2 || barData2.length === 0) {
+      alert('No data available for this period.');
+      return;
+    }
+    setDrilldown({ period: data, data: barData2 });
+  };
+
+  // Handler for back button (Level 2 -> Level 1)
+  const handleBack = () => setDrilldown(null);
 
   return (
     <div className="dashboard-root" ref={dashboardImageRef}>
@@ -137,25 +217,64 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
               </tbody>
             </table>
           </div>
-          <div className="dashboard-graphs">
+          <div className="dashboard-graphs" style={{ position: 'relative' }}>
+            {/* Back button for Level 2 */}
+            {drilldown && (
+              <button
+                className="dashboard-back-btn"
+                onClick={handleBack}
+                style={{
+                  position: 'absolute',
+                  top: 12,
+                  right: 12,
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  zIndex: 10,
+                  padding: 0,
+                }}
+                aria-label="Back to Level 1"
+              >
+                {/* SVG refresh icon, styled to match theme */}
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#E33CC1" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 4v6h-6"/>
+                  <path d="M1 20v-6h6"/>
+                  <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"/>
+                  <path d="M20.49 15A9 9 0 0 1 5.87 18.36L1 14"/>
+                </svg>
+              </button>
+            )}
             <div className="graphs-title" style={{ marginTop: '0.6rem' }}>Graphs
               <div className="graph-label" style={{ marginBottom: '0.0rem', marginTop: '0.0rem', fontStyle: 'normal', fontFamily: 'DM Serif Text', color: '#0E2102', fontWeight: 100 }}> 
                 Message Equity Index</div>
             </div>
-      
             <div className="graphs-bar">
-              <ResponsiveContainer width="100%" height={180} minWidth={200} minHeight={100}>
-                <BarChart data={barData} margin={{ top: 0, right: 5, left: -30, bottom: 0 }}>
-                  <XAxis
-                    dataKey="periodLabel" tick={CustomXAxisTick} interval={0}
-                  />
-                  <YAxis domain={[0, 100]} tick={{ fontSize: '0.7rem' }} ticks={[0, 100]} tickFormatter={v => `${v}%`} />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Legend verticalAlign="bottom" align="center" layout="horizontal" iconType="rect" height={33} wrapperStyle={{ fontSize: '0.5rem', marginTop: 0, marginBottom: -5, marginLeft: 30 }} />
-                  <Bar dataKey={userA} stackId="a" fill={COLORS[0]} name={userA} />
-                  <Bar dataKey={userB} stackId="a" fill={COLORS[1]} name={userB} />
-                </BarChart>
-              </ResponsiveContainer>
+              {/* Defensive: show message if no data */}
+              {((drilldown ? drilldown.data : barData)?.length === 0) ? (
+                <div style={{ color: '#E33CC1', textAlign: 'center', padding: '2rem' }}>No data available for this period.</div>
+              ) : (
+                <ResponsiveContainer width="100%" height={180} minWidth={200} minHeight={100}>
+                  <BarChart
+                    data={drilldown ? drilldown.data : barData}
+                    margin={{ top: 0, right: 5, left: -30, bottom: 0 }}
+                    onClick={drilldown ? undefined : (e: any) => {
+                      if (e && e.activeLabel) {
+                        const d = (drilldown ? drilldown.data : barData).find((b: any) => b.periodLabel === e.activeLabel);
+                        if (d) handleBarClick(d);
+                      }
+                    }}
+                  >
+                    <XAxis
+                      dataKey="periodLabel" tick={CustomXAxisTick} interval={0}
+                    />
+                    <YAxis domain={[0, 100]} tick={{ fontSize: '0.7rem' }} ticks={[0, 100]} tickFormatter={v => `${v}%`} />
+                    <Tooltip content={<CustomTooltip />} />
+                    <Legend verticalAlign="bottom" align="center" layout="horizontal" iconType="rect" height={33} wrapperStyle={{ fontSize: '0.5rem', marginTop: 0, marginBottom: -5, marginLeft: 30 }} />
+                    <Bar dataKey={userA} stackId="a" fill={COLORS[0]} name={userA} />
+                    <Bar dataKey={userB} stackId="a" fill={COLORS[1]} name={userB} />
+                  </BarChart>
+                </ResponsiveContainer>
+              )}
             </div>
           </div>
         </div>

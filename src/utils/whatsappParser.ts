@@ -398,7 +398,15 @@ export function getFactsAndFigures(messages: WhatsAppMessage[]) {
   const totalMessages = messages.length;
 
   // 2. Total media shared
-  const totalMedia = messages.filter(m => m.isMedia).length;
+  const totalMedia = messages.filter(m => {
+    // WhatsApp-style
+    if (m.isMedia) return true;
+    // Messenger-style: has a 'share' field
+    if ((m as any).share) return true;
+    // Messenger-style: content says 'You sent an attachment.'
+    if (typeof m.message === 'string' && /you sent an attachment\.?/i.test(m.message)) return true;
+    return false;
+  }).length;
 
   // 3. Total emojis used
   const emojiRegex = /[\p{Emoji}]/gu;
@@ -661,18 +669,10 @@ export function getStackedBarData(messages: WhatsAppMessage[], facts: any) {
     const start = new Date(firstDate.getTime() + i * binSize);
     const end = i === totalBins - 1 ? new Date(lastDate.getTime() + 1) : new Date(firstDate.getTime() + (i + 1) * binSize);
     const daysElapsed = Math.floor((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
-    // Improved label: if same year, 'May – July 2024', else 'Dec 2024 – Jan 2025'
-    const sameYear = start.getFullYear() === end.getFullYear();
-    let label = '';
-    if (sameYear) {
-      const startMonth = start.toLocaleDateString('en-US', { month: 'short' });
-      const endMonth = end.toLocaleDateString('en-US', { month: 'short' });
-      label = `${startMonth} – ${endMonth} ${start.getFullYear()}`;
-    } else {
-      const startMonthYear = start.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      const endMonthYear = end.toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
-      label = `${startMonthYear} – ${endMonthYear}`;
-    }
+    // New label: 'Mar 7, 2025 – Mar 12, 2025'
+    const startLabel = start.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const endLabel = end.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    const label = `${startLabel} – ${endLabel}`;
     periods.push({ start, end, label, daysElapsed });
   }
   if (!Array.isArray(periods) || periods.length === 0) return [];
@@ -757,10 +757,14 @@ export async function parseChatFile(file: File): Promise<WhatsAppMessage[]> {
     console.log('Zip file unzipped. Found txt file:', txtFile.name);
     const text = await txtFile.async('string');
     console.log('Contents of extracted txt file:', text.slice(0, 500)); // log first 500 chars for brevity
-    return WhatsAppParser.parseChat(text);
+    const messages = WhatsAppParser.parseChat(text);
+    console.log('Media messages:', messages.filter(m => m.isMedia));
+    return messages;
   } else if (file.name.endsWith('.txt')) {
     const text = await file.text();
-    return WhatsAppParser.parseChat(text);
+    const messages = WhatsAppParser.parseChat(text);
+    console.log('Media messages:', messages.filter(m => m.isMedia));
+    return messages;
   } else {
     throw new Error('Unsupported file type');
   }

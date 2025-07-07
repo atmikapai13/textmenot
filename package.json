@@ -13,11 +13,13 @@
     "GBD": "sh -c 'git add . && git commit -m \"$1\" && git push && npm run build && npm run deploy' --"
   },
   "dependencies": {
+    "@types/react-transition-group": "^4.4.12",
     "gtag": "^1.0.1",
     "html2canvas": "^1.4.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-router-dom": "^6.30.1",
+    "react-transition-group": "^4.4.5",
     "recharts": "^2.9.0"
   },
   "devDependencies": {
