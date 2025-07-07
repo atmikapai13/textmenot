@@ -61,7 +61,7 @@ function TutorialPageWithNav() {
 
 function App() {
   return (
-    <Router basename="/ghosting_validator">
+    <Router basename="/textmenot">
       <RedirectHandler />
       <PageTracker />
       <Routes>
