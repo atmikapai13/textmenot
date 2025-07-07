@@ -44,7 +44,7 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
   };
   const [showCopied, setShowCopied] = useState(false);
   const handleCopyUrl = () => {
-    navigator.clipboard.writeText('https://atmikapai13.github.io/ghosting_validator/');
+    navigator.clipboard.writeText('https://bit.ly/textmenot');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 1500);
   };

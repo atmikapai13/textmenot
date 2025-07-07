@@ -141,7 +141,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
   };
    const handleCopyUrl = () => {
     trackCopyUrl();
-    navigator.clipboard.writeText('https://atmikapai13.github.io/ghosting_validator/');
+    navigator.clipboard.writeText('https://bit.ly/textmenot');
     setShowCopied(true);
     setTimeout(() => setShowCopied(false), 1500);
   };
@@ -367,7 +367,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
             </span>
             
             <span className="dashboard-share" onClick={handleCopyUrl} style={{ cursor: 'pointer' }}>
-              {showCopied ? 'Copied!' : 'helltextmenot.com'}
+              {showCopied ? 'Copied!' : 'bit.ly/textmenot'}
             </span>
             
           </div>
