@@ -92,7 +92,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
             await navigator.share({
               files: [file],
               title: "He'll Text Me. He'll Text Me Not.",
-              text: 'Check out my results!',
+              text: 'Check out my results! Try it at https://bit.ly/textmenot',
             });
             trackShare('native_share');
           } catch (err: any) {

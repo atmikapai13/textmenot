@@ -171,7 +171,7 @@ const COLORS = ['#E33CC1', '#FF9AEF'];
             </span>
             <br />
             <span className="dashboard-share" onClick={handleCopyUrl} style={{ cursor: 'pointer' }}>
-              {showCopied ? 'Copied!' : 'helltextmenot.com'}
+              {showCopied ? 'Copied!' : 'bit.ly/textmenot'}
             </span>
           </div>
         </div>
