@@ -11,7 +11,7 @@ export interface WhatsAppMessage {
 
 export class WhatsAppParser {
   // Regex for both date orders, 2/4 digit year, 24h/12h time, always / separator
-  private static readonly MESSAGE_REGEX = /^\[(\d{1,2})\/(\d{1,2})\/(\d{2,4}),?\s+(\d{1,2}):(\d{2}):(\d{2})(?:\s*(AM|PM))?\]\s+(.+?):\s+([\s\S]+)$/;
+  private static readonly MESSAGE_REGEX = /^[\u200e\u200f\u202a-\u202e]?\[(\d{1,2})\/(\d{1,2})\/(\d{2,4}),?\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)?\]\s+(.+?):\s+([\s\S]+)$/;
   private static readonly SYSTEM_MESSAGE_REGEX = /end-to-end encrypted|Messages and calls are end-to-end encrypted/i;
   private static readonly MESSAGE_REGEX_24H_US = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2})\]\s+(.+?):\s+(.+)$/;
   private static readonly MESSAGE_REGEX_12H_US = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2}\s+(?:AM|PM))\]\s+(.+?):\s+(.+)$/;
@@ -20,14 +20,14 @@ export class WhatsAppParser {
   private static readonly MESSAGE_REGEX_24H_EU_SLASH = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2})\]\s+(.+?):\s+(.+)$/;
   private static readonly MESSAGE_REGEX_12H_EU_SLASH = /^\[(\d{1,2}\/\d{1,2}\/\d{2,4}),?\s+(\d{1,2}:\d{2}:\d{2}\s+(?:AM|PM))\]\s+(.+?):\s+(.+)$/;
   private static readonly MEDIA_PATTERNS = {
-    image: /image omitted/i,
-    sticker: /sticker omitted/i,
-    gif: /gif omitted/i,
-    video: /video omitted/i,
-    audio: /audio omitted/i,
-    document: /document omitted/i,
-    location: /location omitted/i,
-    contact: /contact omitted/i,
+    image: /‎?image omitted/i,
+    sticker: /‎?sticker omitted/i,
+    gif: /‎?gif omitted/i,
+    video: /‎?video omitted/i,
+    audio: /‎?audio omitted/i,
+    document: /‎?document omitted/i,
+    location: /‎?location omitted/i,
+    contact: /‎?contact omitted/i,
     // Add more as needed
   };
 
@@ -101,7 +101,7 @@ export class WhatsAppParser {
     let dateOrder: 'US' | 'EU' | null = null;
 
     for (const line of lines) {
-      const cleanLine = line.trim();
+      const cleanLine = line.replace(/[\u200e\u200f\u202a-\u202e]/g, '').trim();
       if (!cleanLine) continue;
       // Ignore system messages
       if (this.SYSTEM_MESSAGE_REGEX.test(cleanLine)) continue;
@@ -229,12 +229,15 @@ export class WhatsAppParser {
    * Detect if message contains media and what type
    */
   private static detectMedia(message: string): { isMedia: boolean; mediaType?: 'image' | 'sticker' | 'video' | 'audio' | 'document' | 'location' | 'contact' | 'unknown' } {
-    for (const [type, pattern] of Object.entries(this.MEDIA_PATTERNS)) {
-      if (pattern.test(message)) {
-        return { isMedia: true, mediaType: type as 'image' | 'sticker' | 'video' | 'audio' | 'document' | 'location' | 'contact' | 'unknown' };
+    // Split the message into lines and check each line
+    const lines = message.split('\n');
+    for (const line of lines) {
+      for (const [type, pattern] of Object.entries(this.MEDIA_PATTERNS)) {
+        if (pattern.test(line)) {
+          return { isMedia: true, mediaType: type as 'image' | 'sticker' | 'video' | 'audio' | 'document' | 'location' | 'contact' | 'unknown' };
+        }
       }
     }
-    
     return { isMedia: false };
   }
 
@@ -746,6 +749,8 @@ export function fmtInt(val: number): string {
  * Accepts a File (zip or txt). If zip, extracts the first .txt file and parses it. If txt, parses directly.
  */
 export async function parseChatFile(file: File): Promise<WhatsAppMessage[]> {
+  let messages: WhatsAppMessage[];
+  
   if (file.name.endsWith('.zip')) {
     const zip = await JSZip.loadAsync(file);
     // Prefer _chat.txt if present, otherwise any .txt file
@@ -757,13 +762,47 @@ export async function parseChatFile(file: File): Promise<WhatsAppMessage[]> {
     console.log('Zip file unzipped. Found txt file:', txtFile.name);
     const text = await txtFile.async('string');
     console.log('Contents of extracted txt file:', text.slice(0, 500)); // log first 500 chars for brevity
-    return WhatsAppParser.parseChat(text);
+    messages = WhatsAppParser.parseChat(text);
   } else if (file.name.endsWith('.txt')) {
     const text = await file.text();
-    return WhatsAppParser.parseChat(text);
+    messages = WhatsAppParser.parseChat(text);
   } else {
     throw new Error('Unsupported file type');
   }
+
+  // Debug logging for media detection
+  console.log('Total messages parsed:', messages.length);
+  const mediaMessages = messages.filter(m => m.isMedia);
+  console.log('Media messages found:', mediaMessages.length);
+  console.log('Media messages:', mediaMessages.slice(0, 5).map(m => ({
+    sender: m.sender,
+    message: m.message,
+    mediaType: m.mediaType,
+    timestamp: m.timestamp
+  })));
+  
+  // Log some examples of messages that might be media but aren't detected
+  const potentialMediaMessages = messages.filter(m => 
+    m.message.toLowerCase().includes('omitted') || 
+    m.message.toLowerCase().includes('image') ||
+    m.message.toLowerCase().includes('gif') ||
+    m.message.toLowerCase().includes('sticker')
+  ).slice(0, 5);
+  console.log('Potential media messages (not detected):', potentialMediaMessages.map(m => ({
+    sender: m.sender,
+    message: m.message,
+    isMedia: m.isMedia,
+    mediaType: m.mediaType
+  })));
+
+  // Additional debug: show raw message content for potential media messages
+  console.log('Raw message content for potential media messages:');
+  potentialMediaMessages.forEach((m, i) => {
+    console.log(`Message ${i + 1}:`, JSON.stringify(m.message));
+    console.log(`Message ${i + 1} (hex):`, Array.from(m.message).map(c => c.charCodeAt(0).toString(16)).join(' '));
+  });
+
+  return messages;
 }
 
 /**
