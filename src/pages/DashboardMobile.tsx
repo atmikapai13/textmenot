@@ -356,7 +356,7 @@ const DashboardMobile: React.FC<DashboardProps> = () => {
           </div>
         </div>
         <div className="dashboard-summary">
-          We'll let you derive your own conclusions. Happy analyzing!<br />
+          xoxo We'll let you derive your own conclusions xoxo<br />
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginTop: '8px' }}>
             <span className="dashboard-share" onClick={handleShareOrDownload} style={{ cursor: 'pointer' }}>
               Share these results 🌹
